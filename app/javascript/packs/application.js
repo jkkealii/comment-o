@@ -12,6 +12,9 @@ import { render } from 'react-dom';
 import SampleComponent from '../components/SampleComponent';
 
 document.addEventListener('DOMContentLoaded', () => {
+  const homeIndexData = document.getElementById('home-index-data');
+  const oserData = JSON.parse(homeIndexData.getAttribute('data-osers'));
+  const commentData = JSON.parse(homeIndexData.getAttribute('data-comments'));
   const container = document.body.appendChild(document.createElement('div'));
-  render(<SampleComponent/>, container);
+  render(<SampleComponent osers={oserData} comments={commentData} />, container);
 });

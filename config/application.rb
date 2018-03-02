@@ -10,7 +10,6 @@ module CommentO
   class Application < Rails::Application
     # Initialize configuration defaults for originally generated Rails version.
     config.load_defaults 5.1
-    config.force_ssl = true
     config.generators.javascript_engine = :js
 
     config.time_zone = 'Pacific Time (US & Canada)'
