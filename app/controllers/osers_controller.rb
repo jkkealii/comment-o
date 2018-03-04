@@ -7,6 +7,6 @@ class OsersController < ApplicationController
   private
 
   def oser_params
-    params.require(:oser).permit(:username, :flair)
+    params.require(:oser).permit(:username, :flair, :password, :password_confirmation)
   end
 end

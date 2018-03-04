@@ -14,10 +14,6 @@ export default class SampleComponent extends React.Component {
     this._handleNewOser = this._handleNewOser.bind(this);
   }
 
-  componentDidMount() {
-    $('div').length
-  }
-
   _handleNewOser() {
     this.setState({newOserToggle: !this.state.newOserToggle});
   }
@@ -26,6 +22,25 @@ export default class SampleComponent extends React.Component {
     console.log(this.newUsername.value);
     console.log(this.newPassword.value);
     console.log(this.newPasswordConfirmation.value);
+    $.ajax({
+      url: '/osers',
+      type: 'POST',
+      dataType: 'JSON',
+      data: {
+        oser: {
+          username: this.newUsername.value,
+          password: this.newPassword.value,
+          password_confirmation: this.newPasswordConfirmation.value
+        }
+      },
+      success: (data) => {
+        alert('New Oser created!');
+      },
+      error: (xhr) => {
+        let errors = $.parseJSON(xhr.responseText).errors;
+        alert(errors);
+      }
+    });
   }
 
   render() {
