@@ -52,6 +52,7 @@ export default class SampleComponent extends React.Component {
       success: (data) => {
         alert('New Oser created!');
         this._fetchOsers();
+        this.setState({newOserToggle: false});
       },
       error: (xhr) => {
         let errors = $.parseJSON(xhr.responseText).errors;
@@ -101,19 +102,21 @@ export default class SampleComponent extends React.Component {
 
   _handleDeleteOser(event) {
     const id = event.currentTarget.dataset.oserId;
-    $.ajax({
-      url: `/osers/${id}`,
-      type: 'DELETE',
-      dataType: 'JSON',
-      success: (data) => {
-        alert('Oser deleted!');
-        this._fetchOsers();
-      },
-      error: (xhr) => {
-        let errors = $.parseJSON(xhr.responseText).errors;
-        alert(errors);
-      }
-    });
+    if (confirm('Are you sure you want to delete this Oser?')) {
+      $.ajax({
+        url: `/osers/${id}`,
+        type: 'DELETE',
+        dataType: 'JSON',
+        success: (data) => {
+          alert('Oser deleted!');
+          this._fetchOsers();
+        },
+        error: (xhr) => {
+          let errors = $.parseJSON(xhr.responseText).errors;
+          alert(errors);
+        }
+      });
+    }
   }
 
   _handleEditOsername(event) {
