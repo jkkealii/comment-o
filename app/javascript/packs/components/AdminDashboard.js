@@ -1,14 +1,26 @@
 import React from 'react';
 import {} from 'jquery';
+import { render } from 'react-dom';
 
-export default class SampleComponent extends React.Component {
+document.addEventListener('DOMContentLoaded', () => {
+  const homeIndexData = document.getElementById('home-index-data');
+  const oserData = JSON.parse(homeIndexData.getAttribute('data-osers'));
+  const commentData = JSON.parse(homeIndexData.getAttribute('data-comments'));
+  let section = document.createElement('section');
+  section.className = 'section';
+  const footer = document.getElementById('footer');
+  const container = document.body.insertBefore(section, footer);
+  render(<AdminDashboard osers={oserData} comments={commentData} />, container);
+});
+
+export default class AdminDashboard extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       osers: this.props.osers,
       comments: this.props.comments,
       newOserToggle: false,
-      passwordsMatch: false,
+      passwordsMatch: true,
       editingOsers: []
     }
 
@@ -75,29 +87,46 @@ export default class SampleComponent extends React.Component {
 
   _handleUpdateOser(event) {
     const id = parseInt(event.currentTarget.dataset.oserId);
-    $.ajax({
-      url: `/osers/${id}`,
-      type: 'PATCH',
-      dataType: 'JSON',
-      data: {
-        oser: {
-          username: this[`username_${id}`].value,
-          flair: this[`flair_${id}`].value
-        }
-      },
-      success: (data) => {
-        let editingOsers = this.state.editingOsers;
-        let oserIndex = editingOsers.indexOf(id);
-        editingOsers.splice(oserIndex, 1);
-        alert('Oser updated!');
-        this.setState({editingOsers});
-        this._fetchOsers();
-      },
-      error: (xhr) => {
-        let errors = $.parseJSON(xhr.responseText).errors;
-        alert(errors);
+    let username = this[`username_${id}`].value;
+    let flair = this[`flair_${id}`].value;
+    let oser;
+    for (let i = 0; i < this.state.osers.length; i++) {
+      oser = this.state.osers[i];
+      if (parseInt(oser.id) === id) {
+        break;
       }
-    });
+    }
+    if (username === oser.username && flair === oser.flair) {
+      let editingOsers = this.state.editingOsers;
+      let oserIndex = editingOsers.indexOf(id);
+      editingOsers.splice(oserIndex, 1);
+      alert('No changes made');
+      this.setState({editingOsers});
+    } else {
+      $.ajax({
+        url: `/osers/${id}`,
+        type: 'PATCH',
+        dataType: 'JSON',
+        data: {
+          oser: {
+            username: username,
+            flair: flair
+          }
+        },
+        success: (data) => {
+          let editingOsers = this.state.editingOsers;
+          let oserIndex = editingOsers.indexOf(id);
+          editingOsers.splice(oserIndex, 1);
+          alert('Oser updated!');
+          this.setState({editingOsers});
+          this._fetchOsers();
+        },
+        error: (xhr) => {
+          let errors = $.parseJSON(xhr.responseText).errors;
+          alert(errors);
+        }
+      });
+    }
   }
 
   _handleDeleteOser(event) {

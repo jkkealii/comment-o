@@ -7,17 +7,17 @@
 // To reference this file, add <%= javascript_pack_tag 'application' %> to the appropriate
 // layout file, like app/views/layouts/application.html.erb
 
-import React from 'react';
-import { render } from 'react-dom';
-import SampleComponent from '../components/SampleComponent';
-
-document.addEventListener('DOMContentLoaded', () => {
-  const homeIndexData = document.getElementById('home-index-data');
-  const oserData = JSON.parse(homeIndexData.getAttribute('data-osers'));
-  const commentData = JSON.parse(homeIndexData.getAttribute('data-comments'));
-  let section = document.createElement('section');
-  section.className = 'section';
-  const footer = document.getElementById('footer');
-  const container = document.body.insertBefore(section, footer);
-  render(<SampleComponent osers={oserData} comments={commentData} />, container);
-});
+// import React from 'react';
+// import { render } from 'react-dom';
+// import AdminDashboard from '../components/AdminDashboard';
+//
+// document.addEventListener('DOMContentLoaded', () => {
+//   const homeIndexData = document.getElementById('home-index-data');
+//   const oserData = JSON.parse(homeIndexData.getAttribute('data-osers'));
+//   const commentData = JSON.parse(homeIndexData.getAttribute('data-comments'));
+//   let section = document.createElement('section');
+//   section.className = 'section';
+//   const footer = document.getElementById('footer');
+//   const container = document.body.insertBefore(section, footer);
+//   render(<AdminDashboard osers={oserData} comments={commentData} />, container);
+// });
