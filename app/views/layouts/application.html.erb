@@ -11,11 +11,54 @@
   </head>
 
   <body>
-    <header class='navbar'>
-      <div class='section'>
-        <h1 class='title'>COMMENT-O</h1>
-      </div>
+    <header>
     </header>
+    <nav class="navbar is-transparent">
+      <div class="navbar-brand">
+        <a class="navbar-item" href="#">
+          <h2 class="title">Comment-O</h2>
+        </a>
+        <div class="navbar-burger burger" data-target="transparent-navbar">
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+      </div>
+
+      <div id="transparent-navbar" class="navbar-menu">
+        <div class="navbar-start">
+          <a class="navbar-item" href="#">
+            Home
+          </a>
+          <a class="navbar-item" href="#">
+            Osers
+          </a>
+          <a class="navbar-item" href="#">
+            Comments
+          </a>
+        </div>
+
+        <div class="navbar-end">
+          <div class="navbar-item has-dropdown is-hoverable">
+            <a class="navbar-link" href="#">
+              Oser
+            </a>
+            <div class="navbar-dropdown is-boxed">
+              <a class="navbar-item" href="#">
+                Profile
+              </a>
+              <hr class="navbar-divider">
+              <a class="navbar-item" href="#">
+                Preferences
+              </a>
+              <a class="navbar-item is-active" href="#">
+                Log out
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </nav>
     <%= yield %>
     <footer class="footer" id="footer">
       <div class="container">
