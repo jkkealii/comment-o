@@ -15,6 +15,9 @@ document.addEventListener('DOMContentLoaded', () => {
   const homeIndexData = document.getElementById('home-index-data');
   const oserData = JSON.parse(homeIndexData.getAttribute('data-osers'));
   const commentData = JSON.parse(homeIndexData.getAttribute('data-comments'));
-  const container = document.body.appendChild(document.createElement('div'));
+  let section = document.createElement('section');
+  section.className = 'section';
+  const footer = document.getElementById('footer');
+  const container = document.body.insertBefore(section, footer);
   render(<SampleComponent osers={oserData} comments={commentData} />, container);
 });

@@ -3,15 +3,29 @@
   <head>
     <title>Comment-O</title>
     <%= csrf_meta_tags %>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <%= stylesheet_link_tag 'application', media: 'all', 'data-turbolinks-track': 'reload' %>
     <%= javascript_include_tag 'application', 'data-turbolinks-track': 'reload' %>
     <%= javascript_pack_tag 'application' %>
+    <script defer src="https://use.fontawesome.com/releases/v5.0.6/js/all.js"></script>
   </head>
 
   <body>
-    <header>
-      <h1>COMMENT-O</h1>
+    <header class='navbar'>
+      <div class='section'>
+        <h1 class='title'>COMMENT-O</h1>
+      </div>
     </header>
     <%= yield %>
+    <footer class="footer" id="footer">
+      <div class="container">
+        <div class="content has-text-centered">
+          <p>
+            <strong>Comment-O</strong> by <a href="https://twitter.com/joshkuroda">Josh Kuroda</a>. The source code is licensed
+            <a href="http://www.apache.org/licenses/LICENSE-2.0">Apache License 2.0</a>. Questions? Leave a comment.
+          </p>
+        </div>
+      </div>
+    </footer>
   </body>
 </html>

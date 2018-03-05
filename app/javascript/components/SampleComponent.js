@@ -19,9 +19,6 @@ export default class SampleComponent extends React.Component {
   }
 
   _handleCreateOser() {
-    console.log(this.newUsername.value);
-    console.log(this.newPassword.value);
-    console.log(this.newPasswordConfirmation.value);
     $.ajax({
       url: '/osers',
       type: 'POST',
@@ -50,16 +47,20 @@ export default class SampleComponent extends React.Component {
       );
     });
     return (
-      <div>
-        <h2>Hi, I'm SampleComponent!</h2>
-        {!this.state.newOserToggle && <button onClick={this._handleNewOser}>New Oser</button>}
+      <div className="container">
+        <h1 className="title">
+          Hi, I'm SampleComponent!
+        </h1>
+        {!this.state.newOserToggle && <button className='button' onClick={this._handleNewOser}>New Oser</button>}
         {this.state.newOserToggle && <div>
-          <input placeholder='username' ref={username => this.newUsername = username} />
-          <input placeholder='password' ref={password => this.newPassword = password} />
-          <input placeholder='passwordConfirmation' ref={passwordConfirmation => this.newPasswordConfirmation = passwordConfirmation} />
-          <button onClick={this._handleCreateOser}>Submit Oser</button>
+          <input className='input' placeholder='username' ref={username => this.newUsername = username} />
+          <input className='input' placeholder='password' ref={password => this.newPassword = password} />
+          <input className='input' placeholder='passwordConfirmation' ref={passwordConfirmation => this.newPasswordConfirmation = passwordConfirmation} />
+          <button className='button' onClick={this._handleCreateOser}>Submit Oser</button>
         </div>}
-        <h3>Oser list:</h3>
+        <p className="subtitle">
+          <strong>Oser list:</strong>
+        </p>
         {osers}
       </div>
     );
