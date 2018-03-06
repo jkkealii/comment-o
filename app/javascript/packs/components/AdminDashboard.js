@@ -15,6 +15,7 @@ export default class AdminDashboard extends React.Component {
       editingComments: []
     }
 
+    this._fetchAll = this._fetchAll.bind(this);
     this._fetchOsers = this._fetchOsers.bind(this);
     this._fetchComments = this._fetchComments.bind(this);
 
@@ -34,6 +35,17 @@ export default class AdminDashboard extends React.Component {
     this._handleDeleteComment = this._handleDeleteComment.bind(this);
   }
 
+  _fetchAll() {
+    $.ajax({
+      url: '/',
+      type: 'GET',
+      dataType: 'JSON',
+      success: (data) => {
+        this.setState({osers: data.osers, comments: data.comments});
+      }
+    });
+  }
+
   _fetchOsers() {
     $.ajax({
       url: '/osers',
@@ -50,6 +62,9 @@ export default class AdminDashboard extends React.Component {
       url: '/comments',
       type: 'GET',
       dataType: 'JSON',
+      data: {
+        limit: 5
+      },
       success: (data) => {
         this.setState({comments: data.comments});
       }
@@ -130,7 +145,7 @@ export default class AdminDashboard extends React.Component {
           editingOsers.splice(oserIndex, 1);
           alert('Oser updated!');
           this.setState({editingOsers});
-          this._fetchOsers();
+          this._fetchAll();
         },
         error: (xhr) => {
           let errors = $.parseJSON(xhr.responseText).errors;
@@ -149,7 +164,7 @@ export default class AdminDashboard extends React.Component {
         dataType: 'JSON',
         success: (data) => {
           alert('Oser deleted!');
-          this._fetchOsers();
+          this._fetchAll();
         },
         error: (xhr) => {
           let errors = $.parseJSON(xhr.responseText).errors;
@@ -178,7 +193,7 @@ export default class AdminDashboard extends React.Component {
       },
       success: (data) => {
         alert('New Comment created!');
-        this._fetchComments();
+        this._fetchAll();
         this.setState({newCommentOser: null});
       },
       error: (xhr) => {
@@ -252,7 +267,7 @@ export default class AdminDashboard extends React.Component {
         dataType: 'JSON',
         success: (data) => {
           alert('Comment deleted!');
-          this._fetchComments();
+          this._fetchAll();
         },
         error: (xhr) => {
           let errors = $.parseJSON(xhr.responseText).errors;
@@ -284,6 +299,7 @@ export default class AdminDashboard extends React.Component {
           <tr key={`edit_${oser.id}`}>
             <td><input className="input" type="text" ref={username => this[`username_${oser.id}`] = username} onChange={this._handleEditOsername} defaultValue={oser.username}></input></td>
             <td><input className="input" type="text" ref={flair => this[`flair_${oser.id}`] = flair} defaultValue={oser.flair}></input></td>
+            <td>{oser.comments.length}</td>
             <td>{oser.joined}</td>
             <td>
               <div className="buttons has-addons">
@@ -311,6 +327,7 @@ export default class AdminDashboard extends React.Component {
           <tr key={oser.id}>
             <td>{oser.username}</td>
             <td>{oser.flair === null ? 'None' : oser.flair}</td>
+            <td>{oser.comments.length}</td>
             <td>{oser.joined}</td>
             <td>
               <div className="buttons has-addons">
@@ -515,6 +532,7 @@ export default class AdminDashboard extends React.Component {
                   <tr>
                     <th><abbr title="Osername">Oname</abbr></th>
                     <th>Flair</th>
+                    <th><abbr title="Comments">Cmmts</abbr></th>
                     <th><abbr title="Date Created">Joined</abbr></th>
                     <th>Actions</th>
                   </tr>
@@ -526,6 +544,7 @@ export default class AdminDashboard extends React.Component {
                   <tr>
                     <th><abbr title="Osername">Oname</abbr></th>
                     <th>Flair</th>
+                    <th><abbr title="Comments">Cmmts</abbr></th>
                     <th><abbr title="Date Created">Joined</abbr></th>
                     <th>Actions</th>
                   </tr>
