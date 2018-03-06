@@ -1,7 +1,16 @@
-# README
+# COMMENT-O README
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
+[install Postgres](postgresql.org/download)
+
+`gem install pg`
+
+`bundle install`
+
+`yarn install`
+
+`rails db:setup`
+
+`gem install foreman`
 
 Things you may want to cover:
 
