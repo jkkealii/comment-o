@@ -16,3 +16,10 @@
 //= require jquery_ujs
 //= require rails-ujs
 //= require_tree .
+
+$(document).ready(() => {
+  $('.navbar-item, .navbar-link').click((event) => {
+    event.preventDefault();
+    window.location = event.currentTarget.href;
+  });
+});

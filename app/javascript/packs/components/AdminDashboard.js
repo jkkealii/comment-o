@@ -2,17 +2,6 @@ import React from 'react';
 import {} from 'jquery';
 import { render } from 'react-dom';
 
-document.addEventListener('DOMContentLoaded', () => {
-  const homeIndexData = document.getElementById('home-index-data');
-  const oserData = JSON.parse(homeIndexData.getAttribute('data-osers'));
-  const commentData = JSON.parse(homeIndexData.getAttribute('data-comments'));
-  let section = document.createElement('section');
-  section.className = 'section';
-  const footer = document.getElementById('footer');
-  const container = document.body.insertBefore(section, footer);
-  render(<AdminDashboard osers={oserData} comments={commentData} />, container);
-});
-
 export default class AdminDashboard extends React.Component {
   constructor(props) {
     super(props);
@@ -21,17 +10,26 @@ export default class AdminDashboard extends React.Component {
       comments: this.props.comments,
       newOserToggle: false,
       passwordsMatch: true,
-      editingOsers: []
+      editingOsers: [],
+      editingComments: []
     }
 
     this._fetchOsers = this._fetchOsers.bind(this);
+    this._fetchComments = this._fetchComments.bind(this);
+
     this._handleCreateOser = this._handleCreateOser.bind(this);
     this._handleEditOser = this._handleEditOser.bind(this);
-    this._handleEditOsername = this._handleEditOsername.bind(this);
     this._handleUpdateOser = this._handleUpdateOser.bind(this);
     this._handleDeleteOser = this._handleDeleteOser.bind(this);
+
+    this._handleEditOsername = this._handleEditOsername.bind(this);
     this._handleToggleNewOser = this._handleToggleNewOser.bind(this);
     this._confirmPasswordMatch = this._confirmPasswordMatch.bind(this);
+
+    this._handleCreateComment = this._handleCreateComment.bind(this);
+    this._handleEditComment = this._handleEditComment.bind(this);
+    this._handleUpdateComment = this._handleUpdateComment.bind(this);
+    this._handleDeleteComment = this._handleDeleteComment.bind(this);
   }
 
   _fetchOsers() {
@@ -41,6 +39,17 @@ export default class AdminDashboard extends React.Component {
       dataType: 'JSON',
       success: (data) => {
         this.setState({osers: data.osers});
+      }
+    });
+  }
+
+  _fetchComments() {
+    $.ajax({
+      url: '/comments',
+      type: 'GET',
+      dataType: 'JSON',
+      success: (data) => {
+        this.setState({comments: data.comments});
       }
     });
   }
@@ -148,6 +157,84 @@ export default class AdminDashboard extends React.Component {
     }
   }
 
+  _handleCreateComment() {
+
+  }
+
+  _handleEditComment(event) {
+    const id = parseInt(event.currentTarget.dataset.commentId);
+    let editingComments = this.state.editingComments;
+    if (editingComments.includes(id)) {
+      let oserIndex = editingComments.indexOf(id);
+      editingComments.splice(oserIndex, 1);
+    } else {
+      editingComments.push(id);
+    }
+    this.setState({editingComments});
+  }
+
+  _handleUpdateComment(event) {
+    const id = parseInt(event.currentTarget.dataset.commentId);
+    let content = this[`comment_${id}`].value;
+    let comment;
+    for (let i = 0; i < this.state.comments.length; i++) {
+      comment = this.state.comments[i];
+      if (parseInt(comment.id) === id) {
+        break;
+      }
+    }
+    if (content === comment.content) {
+      let editingComments = this.state.editingComments;
+      let commentIndex = editingComments.indexOf(id);
+      editingComments.splice(commentIndex, 1);
+      alert('No changes made');
+      this.setState({editingComments});
+    } else {
+      $.ajax({
+        url: `/comments/${id}`,
+        type: 'PATCH',
+        dataType: 'JSON',
+        data: {
+          comment: {
+            edited: true,
+            content: content
+          }
+        },
+        success: (data) => {
+          let editingComments = this.state.editingComments;
+          let commentIndex = editingComments.indexOf(id);
+          editingComments.splice(commentIndex, 1);
+          alert('Comment updated!');
+          this.setState({editingComments});
+          this._fetchComments();
+        },
+        error: (xhr) => {
+          let errors = $.parseJSON(xhr.responseText).errors;
+          alert(errors);
+        }
+      });
+    }
+  }
+
+  _handleDeleteComment(event) {
+    const id = event.currentTarget.dataset.commentId;
+    if (confirm('Are you sure you want to delete this Comment?')) {
+      $.ajax({
+        url: `/comments/${id}`,
+        type: 'DELETE',
+        dataType: 'JSON',
+        success: (data) => {
+          alert('Comment deleted!');
+          this._fetchComments();
+        },
+        error: (xhr) => {
+          let errors = $.parseJSON(xhr.responseText).errors;
+          alert(errors);
+        }
+      });
+    }
+  }
+
   _handleEditOsername(event) {
     let target = event.currentTarget;
     if (target.value === '') {
@@ -213,6 +300,56 @@ export default class AdminDashboard extends React.Component {
               </div>
             </td>
           </tr>
+        );
+      }
+    });
+    let comments = this.state.comments.map((comment) => {
+      if (this.state.editingComments.includes(comment.id)) {
+        return(
+          <div className="card" key={`edit_${comment.id}`}>
+            <header className="card-header">
+              <h5 className="card-header-title">
+                {comment.oser.username}
+                <p className="subtitle has-text-info" style={{verticalAlign: 'super', fontSize: '0.75rem'}}>&nbsp;- {comment.oser.flair}</p>
+              </h5>
+            </header>
+            <div className="card-content">
+              <div className="content">
+                <textarea className="textarea" ref={content => this[`comment_${comment.id}`] = content} defaultValue={comment.content}></textarea>
+                <br/>
+                <time dateTime={comment.posted.datetime}>{comment.posted.formatted}</time>
+                {comment.edited && <time dateTime={comment.updated.datetime}>&nbsp;- Edited: {comment.updated.formatted}</time>}
+              </div>
+            </div>
+            <footer className="card-footer">
+              <a data-comment-id={comment.id} className="card-footer-item" onClick={this._handleUpdateComment}>Save</a>
+              <a data-comment-id={comment.id} className="card-footer-item" onClick={this._handleEditComment}>Edit</a>
+              <a data-comment-id={comment.id} className="card-footer-item" onClick={this._handleDeleteComment}>Delete</a>
+            </footer>
+          </div>
+        );
+      } else {
+        return(
+          <div className="card" key={comment.id}>
+            <header className="card-header">
+              <h5 className="card-header-title">
+                {comment.oser.username}
+                <p className="subtitle has-text-info" style={{verticalAlign: 'super', fontSize: '0.75rem'}}>&nbsp;- {comment.oser.flair}</p>
+              </h5>
+            </header>
+            <div className="card-content">
+              <div className="content">
+                {comment.content}
+                <br/>
+                <time dateTime={comment.posted.datetime}>{comment.posted.formatted}</time>
+                {comment.edited && <time dateTime={comment.updated.datetime}>&nbsp;- Edited: {comment.updated.formatted}</time>}
+              </div>
+            </div>
+            <footer className="card-footer">
+              <a data-comment-id={comment.id} className="card-footer-item" onClick={this._handleEditComment}>Edit</a>
+              <a data-comment-id={comment.id} className="card-footer-item" onClick={this._handleDeleteComment}>Delete</a>
+            </footer>
+          </div>
         );
       }
     });
@@ -302,10 +439,8 @@ export default class AdminDashboard extends React.Component {
           </div>
           <div className="tile is-parent">
             <div className="tile is-child box">
-              <p className="title">Comments</p>
-              <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam semper diam at erat pulvinar, at pulvinar felis blandit. Vestibulum volutpat tellus diam, consequat gravida libero rhoncus ut. Morbi maximus, leo sit amet vehicula eleifend, nunc dui porta orci, quis semper odio felis ut quam.</p>
-              <p>Suspendisse varius ligula in molestie lacinia. Maecenas varius eget ligula a sagittis. Pellentesque interdum, nisl nec interdum maximus, augue diam porttitor lorem, et sollicitudin felis neque sit amet erat. Maecenas imperdiet felis nisi, fringilla luctus felis hendrerit sit amet. Aenean vitae gravida diam, finibus dignissim turpis. Sed eget varius ligula, at volutpat tortor.</p>
-              <p>Integer sollicitudin, tortor a mattis commodo, velit urna rhoncus erat, vitae congue lectus dolor consequat libero. Donec leo ligula, maximus et pellentesque sed, gravida a metus. Cras ullamcorper a nunc ac porta. Aliquam ut aliquet lacus, quis faucibus libero. Quisque non semper leo.</p>
+              <p className="title">Recent Comments</p>
+              {comments}
             </div>
           </div>
         </div>
@@ -313,3 +448,14 @@ export default class AdminDashboard extends React.Component {
     );
   }
 }
+
+$(document).ready(() => {
+  const homeIndexData = document.getElementById('home-index-data');
+  const oserData = JSON.parse(homeIndexData.getAttribute('data-osers'));
+  const commentData = JSON.parse(homeIndexData.getAttribute('data-comments'));
+  let section = document.createElement('section');
+  section.className = 'section';
+  const footer = document.getElementById('footer');
+  const container = document.body.insertBefore(section, footer);
+  render(<AdminDashboard osers={oserData} comments={commentData} />, container);
+});

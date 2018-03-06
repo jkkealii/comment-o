@@ -8,8 +8,14 @@ class CommentsController < ApplicationController
         ups: comment.ups,
         downs: comment.downs,
         edited: comment.edited,
-        posted: comment.created_at.to_formatted_s(:long),
-        updated: comment.updated_at.to_formatted_s(:long),
+        posted: {
+          formatted: comment.created_at.to_formatted_s(:long),
+          datetime: comment.created_at.strftime('%Y-%m-%dT%l:%M:%S')
+        },
+        updated: {
+          formatted: comment.updated_at.to_formatted_s(:long),
+          datetime: comment.updated_at.strftime('%Y-%m-%dT%l:%M:%S')
+        },
         oser: {
           id: comment.oser.id,
           username: comment.oser.username,

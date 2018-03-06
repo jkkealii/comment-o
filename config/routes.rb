@@ -1,7 +1,7 @@
 Rails.application.routes.draw do
   root to: 'home#index'
-  get 'home/osers', to: 'home#osers'
-  get 'home/comments', to: 'home#comments'
+  get '/osers_page', to: 'home#osers_page'
+  get '/comments_page', to: 'home#comments_page'
 
   resources :comments
   resources :osers
