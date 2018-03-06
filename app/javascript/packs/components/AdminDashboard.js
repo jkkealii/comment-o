@@ -9,6 +9,7 @@ export default class AdminDashboard extends React.Component {
       osers: this.props.osers,
       comments: this.props.comments,
       newOserToggle: false,
+      newCommentOser: null,
       passwordsMatch: true,
       editingOsers: [],
       editingComments: []
@@ -26,6 +27,7 @@ export default class AdminDashboard extends React.Component {
     this._handleToggleNewOser = this._handleToggleNewOser.bind(this);
     this._confirmPasswordMatch = this._confirmPasswordMatch.bind(this);
 
+    this._handleNewComment = this._handleNewComment.bind(this);
     this._handleCreateComment = this._handleCreateComment.bind(this);
     this._handleEditComment = this._handleEditComment.bind(this);
     this._handleUpdateComment = this._handleUpdateComment.bind(this);
@@ -157,8 +159,33 @@ export default class AdminDashboard extends React.Component {
     }
   }
 
-  _handleCreateComment() {
+  _handleNewComment(event) {
+    const id = parseInt(event.currentTarget.dataset.oserId);
+    const username = event.currentTarget.dataset.oserUsername;
+    this.setState({newCommentOser: {id: id, username: username}});
+  }
 
+  _handleCreateComment() {
+    $.ajax({
+      url: '/comments',
+      type: 'POST',
+      dataType: 'JSON',
+      data: {
+        comment: {
+          oser_id: this.state.newCommentOser.id,
+          content: this.newComment.value
+        }
+      },
+      success: (data) => {
+        alert('New Comment created!');
+        this._fetchComments();
+        this.setState({newCommentOser: null});
+      },
+      error: (xhr) => {
+        let errors = $.parseJSON(xhr.responseText).errors;
+        alert(errors);
+      }
+    });
   }
 
   _handleEditComment(event) {
@@ -261,7 +288,7 @@ export default class AdminDashboard extends React.Component {
             <td>
               <div className="buttons has-addons">
                 <a className="button is-white" data-oser-id={oser.id} onClick={this._handleEditOser}>
-                  <span className="icon has-text-info" title="Edit Oser">
+                  <span className="icon has-text-link" title="Edit Oser">
                     <i className="fas fa-edit"></i>
                   </span>
                 </a>
@@ -288,8 +315,13 @@ export default class AdminDashboard extends React.Component {
             <td>
               <div className="buttons has-addons">
                 <a className="button is-white" data-oser-id={oser.id} onClick={this._handleEditOser}>
-                  <span className="icon has-text-info" title="Edit Oser">
+                  <span className="icon has-text-link" title="Edit Oser">
                     <i className="fas fa-edit"></i>
+                  </span>
+                </a>
+                <a className="button is-white" data-oser-id={oser.id} data-oser-username={oser.username} onClick={this._handleNewComment}>
+                  <span className="icon has-text-info" title="New Comment">
+                    <i className="fas fa-plus"></i>
                   </span>
                 </a>
                 <a className="button is-white" data-oser-id={oser.id} onClick={this._handleDeleteOser}>
@@ -303,10 +335,16 @@ export default class AdminDashboard extends React.Component {
         );
       }
     });
-    let comments = this.state.comments.map((comment) => {
+    let comments = this.state.comments.map((comment, index) => {
       if (this.state.editingComments.includes(comment.id)) {
+        let cardStyle = null;
+        if (index > 0) {
+          cardStyle = {
+            marginTop: '10px'
+          };
+        }
         return(
-          <div className="card" key={`edit_${comment.id}`}>
+          <div className="card" style={cardStyle} key={`edit_${comment.id}`}>
             <header className="card-header">
               <h5 className="card-header-title">
                 {comment.oser.username}
@@ -317,20 +355,36 @@ export default class AdminDashboard extends React.Component {
               <div className="content">
                 <textarea className="textarea" ref={content => this[`comment_${comment.id}`] = content} defaultValue={comment.content}></textarea>
                 <br/>
-                <time dateTime={comment.posted.datetime}>{comment.posted.formatted}</time>
-                {comment.edited && <time dateTime={comment.updated.datetime}>&nbsp;- Edited: {comment.updated.formatted}</time>}
+                <nav className="level">
+                  <div className="level-left">
+                    <div className="level-item content is-small">
+                      <time dateTime={comment.posted.datetime}>{comment.posted.formatted}</time>
+                    </div>
+                  </div>
+                  <div className="level-right">
+                    <div className="content is-small">
+                      {comment.edited && <time dateTime={comment.updated.datetime}>Edited: {comment.updated.formatted}</time>}
+                    </div>
+                  </div>
+                </nav>
               </div>
             </div>
             <footer className="card-footer">
-              <a data-comment-id={comment.id} className="card-footer-item" onClick={this._handleUpdateComment}>Save</a>
+              <a data-comment-id={comment.id} className="card-footer-item has-text-success" onClick={this._handleUpdateComment}>Save</a>
               <a data-comment-id={comment.id} className="card-footer-item" onClick={this._handleEditComment}>Edit</a>
-              <a data-comment-id={comment.id} className="card-footer-item" onClick={this._handleDeleteComment}>Delete</a>
+              <a data-comment-id={comment.id} className="card-footer-item has-text-danger" onClick={this._handleDeleteComment}>Delete</a>
             </footer>
           </div>
         );
       } else {
+        let cardStyle = null;
+        if (index > 0) {
+          cardStyle = {
+            marginTop: '10px'
+          };
+        }
         return(
-          <div className="card" key={comment.id}>
+          <div className="card" style={cardStyle} key={comment.id}>
             <header className="card-header">
               <h5 className="card-header-title">
                 {comment.oser.username}
@@ -341,21 +395,63 @@ export default class AdminDashboard extends React.Component {
               <div className="content">
                 {comment.content}
                 <br/>
-                <time dateTime={comment.posted.datetime}>{comment.posted.formatted}</time>
-                {comment.edited && <time dateTime={comment.updated.datetime}>&nbsp;- Edited: {comment.updated.formatted}</time>}
+                <nav className="level">
+                  <div className="level-left">
+                    <div className="level-item content is-small">
+                      <time dateTime={comment.posted.datetime}>{comment.posted.formatted}</time>
+                    </div>
+                  </div>
+                  <div className="level-right">
+                    <div className="level-item content is-small">
+                      {comment.edited && <time dateTime={comment.updated.datetime}>Edited: {comment.updated.formatted}</time>}
+                    </div>
+                  </div>
+                </nav>
               </div>
             </div>
             <footer className="card-footer">
               <a data-comment-id={comment.id} className="card-footer-item" onClick={this._handleEditComment}>Edit</a>
-              <a data-comment-id={comment.id} className="card-footer-item" onClick={this._handleDeleteComment}>Delete</a>
+              <a data-comment-id={comment.id} className="card-footer-item has-text-danger" onClick={this._handleDeleteComment}>Delete</a>
             </footer>
           </div>
         );
       }
     });
     let passwordConfirmationClass = this.state.passwordsMatch ? "input" : "input is-danger";
+    let newCommentModal = null;
+    if (this.state.newCommentOser !== null) {
+      newCommentModal =
+        <div className="modal is-active">
+          <div className="modal-background" onClick={() => this.setState({newCommentOser: null})}></div>
+          <div className="modal-card">
+            <header className="modal-card-head">
+              <p className="modal-card-title">New Comment</p>
+              <button className="delete" aria-label="close" onClick={() => this.setState({newCommentOser: null})}></button>
+            </header>
+            <section className="modal-card-body">
+              <div className="field">
+                <label className="label">Oser</label>
+                <div className="control">
+                  <input className="input" type="text" placeholder={this.state.newCommentOser.username} disabled />
+                </div>
+              </div>
+              <div className="field">
+                <label className="label">Comment</label>
+                <div className="control">
+                  <textarea className="textarea" placeholder="Comment content" ref={newComment => this.newComment = newComment}></textarea>
+                </div>
+              </div>
+            </section>
+            <footer className="modal-card-foot">
+              <button className="button is-success" onClick={this._handleCreateComment}>Submit</button>
+              <button className="button" onClick={() => this.setState({newCommentOser: null})}>Cancel</button>
+            </footer>
+          </div>
+        </div>
+    }
     return (
       <div className="container">
+        {newCommentModal}
         <nav className="level">
           <div className="tags has-addons">
             <span className="tag is-primary">Osers</span>
@@ -365,13 +461,13 @@ export default class AdminDashboard extends React.Component {
             Hello, Josh! Welcome back.
           </h1>
           <div className="tags has-addons">
-            <span className="tag is-link">Comments</span>
+            <span className="tag is-info">Comments</span>
             <span className="tag">{this.state.comments.length}</span>
           </div>
         </nav>
         {!this.state.newOserToggle && <div className="field">
           <p className="control">
-            <button className='button' onClick={this._handleToggleNewOser}>New Oser</button>
+            <button className='button is-primary' onClick={this._handleToggleNewOser}>New Oser</button>
           </p>
         </div>}
         {this.state.newOserToggle && <div className="field is-grouped">
