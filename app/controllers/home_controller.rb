@@ -21,6 +21,6 @@ class HomeController < ApplicationController
   end
 
   def comments_page
-    @comments = grab_comments
+    @comments = Comment.grab_comments
   end
 end

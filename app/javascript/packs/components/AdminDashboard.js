@@ -365,7 +365,7 @@ export default class AdminDashboard extends React.Component {
             <header className="card-header">
               <h5 className="card-header-title">
                 {comment.oser.username}
-                <p className="subtitle has-text-info" style={{verticalAlign: 'super', fontSize: '0.75rem'}}>&nbsp;- {comment.oser.flair}</p>
+                {comment.oser.flair !== null && <p className="subtitle has-text-info" style={{verticalAlign: 'super', fontSize: '0.75rem'}}>&nbsp;- {comment.oser.flair}</p>}
               </h5>
             </header>
             <div className="card-content">
@@ -405,7 +405,7 @@ export default class AdminDashboard extends React.Component {
             <header className="card-header">
               <h5 className="card-header-title">
                 {comment.oser.username}
-                <p className="subtitle has-text-info" style={{verticalAlign: 'super', fontSize: '0.75rem'}}>&nbsp;- {comment.oser.flair}</p>
+                {comment.oser.flair !== null && <p className="subtitle has-text-info" style={{verticalAlign: 'super', fontSize: '0.75rem'}}>&nbsp;- {comment.oser.flair}</p>}
               </h5>
             </header>
             <div className="card-content">
