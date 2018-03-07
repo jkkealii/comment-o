@@ -1,8 +1,10 @@
 Rails.application.routes.draw do
   root to: 'home#index'
-  get '/osers_page', to: 'home#osers_page'
-  get '/comments_page', to: 'home#comments_page'
+  get '/osers/all', to: 'home#osers'
+  get '/comments/all', to: 'home#comments'
+
   get '/comments/:id/children', to: 'comments#children'
+  get '/signup', to: 'home#signup'
 
   resources :comments
   resources :osers

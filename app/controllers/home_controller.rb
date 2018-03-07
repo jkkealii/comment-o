@@ -16,11 +16,15 @@ class HomeController < ApplicationController
     end
   end
 
-  def osers_page
+  def signup
+
+  end
+
+  def osers
     @osers = Oser.grab_osers
   end
 
-  def comments_page
+  def comments
     @comments = Comment.grab_comments
     @comment_count = Comment.count
   end
