@@ -1,6 +1,6 @@
 <%= content_tag :div,
   id: "home-comments-data",
-  data: { comments: @comments } do %>
+  data: { comments: @comments, comment_count: @comment_count } do %>
 <% end %>
 
 <%= javascript_pack_tag 'components/Comments' %>

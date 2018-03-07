@@ -1,14 +1,14 @@
 class Comment < ApplicationRecord
   belongs_to :oser
   belongs_to :parent, class_name: 'Comment'
-  has_many :children, class_name: 'Comment', foreign_key: 'parent_id'
+  has_many :children, class_name: 'Comment', foreign_key: 'parent_id', dependent: :destroy
 
   validates :content, presence: true, length: { minimum: 1, message: 'Comment cannot be blank' }
 
   scope :top_level, -> { where(parent_id: nil) }
   scope :child, -> { where('parent_id IS NOT NULL') }
 
-  def child_comments
+  def child_comments(parent_ids = [])
     comments = []
     children.includes(:oser, :children).each do |child|
       comment_data = {
@@ -18,6 +18,7 @@ class Comment < ApplicationRecord
         downs: child.downs,
         edited: child.edited,
         parent_id: child.parent_id,
+        parent_ids: (parent_ids || []) << self.id,
         children_count: child.children.size,
         children: [],
         posted: {
@@ -54,6 +55,7 @@ class Comment < ApplicationRecord
         downs: comment.downs,
         edited: comment.edited,
         parent_id: comment.parent_id,
+        parent_ids: [],
         children_count: comment.children.size,
         children: [],
         posted: {

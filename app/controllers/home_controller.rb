@@ -22,5 +22,6 @@ class HomeController < ApplicationController
 
   def comments_page
     @comments = Comment.grab_comments
+    @comment_count = Comment.count
   end
 end
