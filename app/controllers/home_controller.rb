@@ -2,7 +2,7 @@ class HomeController < ApplicationController
   layout 'application'
 
   def index
-    @comments = Comment.grab_comments(5)
+    @comments = Comment.grab_comments(false, 5)
     @osers = Oser.grab_osers
 
     respond_to do |format|

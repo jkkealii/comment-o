@@ -402,11 +402,37 @@ export default class AdminDashboard extends React.Component {
         }
         return(
           <div className="card" style={cardStyle} key={comment.id}>
-            <header className="card-header">
-              <h5 className="card-header-title">
-                {comment.oser.username}
-                {comment.oser.flair !== null && <p className="subtitle has-text-info" style={{verticalAlign: 'super', fontSize: '0.75rem'}}>&nbsp;- {comment.oser.flair}</p>}
-              </h5>
+            <header className="level card-header">
+              <div className="level-left">
+                <h5 className="level-item card-header-title">
+                  {comment.oser.username}
+                  {comment.oser.flair !== null && <p className="subtitle has-text-info" style={{verticalAlign: 'super', fontSize: '0.75rem'}}>&nbsp;- {comment.oser.flair}</p>}
+                </h5>
+              </div>
+              <div className="level-right">
+                <div className="card-header-title">
+                  <div className="level-item">
+                    <div className="tags has-addons">
+                      <span className="tag">
+                        <span class="icon">
+                          <i class="fas fa-arrow-alt-circle-up"></i>
+                        </span>
+                      </span>
+                      <span className="tag is-success">{comment.ups}</span>
+                    </div>
+                  </div>
+                  <div className="level-item">
+                    <div className="tags has-addons">
+                      <span className="tag">
+                        <span class="icon">
+                          <i class="fas fa-arrow-alt-circle-down"></i>
+                        </span>
+                      </span>
+                      <span className="tag is-warning">{comment.downs}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </header>
             <div className="card-content">
               <div className="content">

@@ -5,6 +5,9 @@ class Comment < ApplicationRecord
 
   validates :content, presence: true, length: { minimum: 1, message: 'Comment cannot be blank' }
 
+  scope :top_level, -> { where(parent_id: nil) }
+  scope :child, -> { where('parent_id IS NOT NULL') }
+
   def child_comments
     comments = []
     children.includes(:oser, :children).each do |child|
@@ -14,7 +17,9 @@ class Comment < ApplicationRecord
         ups: child.ups,
         downs: child.downs,
         edited: child.edited,
-        children: child.child_comments,
+        parent_id: child.parent_id,
+        children_count: child.children.size,
+        children: [],
         posted: {
           formatted: child.created_at.to_formatted_s(:long),
           datetime: child.created_at.strftime('%Y-%m-%dT%l:%M:%S')
@@ -34,12 +39,12 @@ class Comment < ApplicationRecord
     comments
   end
 
-  def self.grab_comments(limit = nil, include_children = false)
-    if limit.nil?
-      comment_records = Comment.order(created_at: :desc).includes(:oser, :children)
-    else
-      comment_records = Comment.order(created_at: :desc).limit(limit.to_i).includes(:oser, :children)
-    end
+  def self.grab_comments(top_level_only = true, limit = nil, include_children = false)
+    eager_loads = [:oser]
+    eager_loads << :children if include_children
+    comment_records = Comment.order(created_at: :desc).includes(eager_loads)
+    comment_records = comment_records.limit(limit.to_i) if limit.present?
+    comment_records = comment_records.top_level if top_level_only
     comments = []
     comment_records.each do |comment|
       comment_data = {
@@ -48,6 +53,9 @@ class Comment < ApplicationRecord
         ups: comment.ups,
         downs: comment.downs,
         edited: comment.edited,
+        parent_id: comment.parent_id,
+        children_count: comment.children.size,
+        children: [],
         posted: {
           formatted: comment.created_at.to_formatted_s(:long),
           datetime: comment.created_at.strftime('%Y-%m-%dT%l:%M:%S')

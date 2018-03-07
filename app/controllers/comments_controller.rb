@@ -19,6 +19,11 @@ class CommentsController < ApplicationController
     render json: { errors: comment.errors.full_messages.join("\n") }, status: 422 unless comment.destroy
   end
 
+  def children
+    children = Comment.find(params[:id]).child_comments
+    render json: { children: children }
+  end
+
   private
 
   def comment_params
