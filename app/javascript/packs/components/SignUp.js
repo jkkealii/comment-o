@@ -33,15 +33,14 @@ export default class SignUp extends React.Component {
     let target = event.currentTarget;
     let password;
     let passwordConfirmation;
-    let progress;
     if (target.id === 'password') {
       password = target.value;
       passwordConfirmation = this.state.passwordConfirmation;
-      progress = password.length;
     } else {
       password = this.state.password;
       passwordConfirmation = target.value;
     }
+    let progress = password.length;
     let passwordsMatch = passwordConfirmation !== '' && password === passwordConfirmation;
     this.setState({
       passwordsMatch,
@@ -52,7 +51,26 @@ export default class SignUp extends React.Component {
   }
 
   _handleCreateOser() {
-
+    $.ajax({
+      url: '/osers',
+      type: 'POST',
+      dataType: 'JSON',
+      data: {
+        oser: {
+          username: this.state.username,
+          password: this.state.password,
+          password_confirmation: this.state.passwordConfirmation
+        }
+      },
+      success: (data) => {
+        alert('Sign up successful!');
+        window.location = '/';
+      },
+      error: (xhr) => {
+        let errors = $.parseJSON(xhr.responseText).errors;
+        alert(errors);
+      }
+    });
   }
 
   render() {
