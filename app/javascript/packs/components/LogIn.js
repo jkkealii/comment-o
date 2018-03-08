@@ -69,7 +69,7 @@ export default class LogIn extends React.Component {
             </div>
           </div>
         </section>
-        <div style={{padding: '3rem'}}>
+        <form action="javascript:void(0);" style={{padding: '3rem'}}>
           <div className="field">
             <label className="label">Osername</label>
             <p className="control has-icons-left">
@@ -98,7 +98,7 @@ export default class LogIn extends React.Component {
               <div className="level-item">
                 <div className="field is-grouped is-grouped-right">
                   <p className="control">
-                    <button className="button is-large is-success" onClick={this._handleLogIn}>
+                    <button type="submit" className="button is-large is-success" onClick={this._handleLogIn}>
                       Log In
                     </button>
                   </p>
@@ -106,7 +106,7 @@ export default class LogIn extends React.Component {
               </div>
             </div>
           </nav>
-        </div>
+        </form>
       </div>
     );
   }

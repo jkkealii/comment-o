@@ -364,7 +364,7 @@ export default class AdminDashboard extends React.Component {
         }
         return(
           <div className="card" style={cardStyle} key={`edit_${comment.id}`}>
-            <header className="level card-header">
+            <header className="level card-header" style={{marginBottom: 'unset'}}>
               <div className="level-left">
                 <h5 className="level-item card-header-title">
                   {comment.oser.username}
@@ -432,7 +432,7 @@ export default class AdminDashboard extends React.Component {
         }
         return(
           <div className="card" style={cardStyle} key={comment.id}>
-            <header className="level card-header">
+            <header className="level card-header" style={{marginBottom: 'unset'}}>
               <div className="level-left">
                 <h5 className="level-item card-header-title">
                   {comment.oser.username}

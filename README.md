@@ -12,6 +12,10 @@
 
 `gem install foreman`
 
+`foreman start`
+
+localhost:5000
+
 Things you may want to cover:
 
 * Ruby version
