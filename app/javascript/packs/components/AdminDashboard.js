@@ -81,6 +81,7 @@ export default class AdminDashboard extends React.Component {
       type: 'POST',
       dataType: 'JSON',
       data: {
+        admin: true,
         oser: {
           username: this.newUsername.value,
           password: this.newPassword.value,
@@ -375,8 +376,8 @@ export default class AdminDashboard extends React.Component {
                     <div className="control">
                       <div className="tags has-addons">
                         <span className="tag">
-                          <span class="icon">
-                            <i class="fas fa-arrow-alt-circle-up"></i>
+                          <span className="icon">
+                            <i className="fas fa-arrow-alt-circle-up"></i>
                           </span>
                         </span>
                         <span className="tag is-success">{comment.ups}</span>
@@ -385,8 +386,8 @@ export default class AdminDashboard extends React.Component {
                     <div className="control">
                       <div className="tags has-addons">
                         <span className="tag">
-                          <span class="icon">
-                            <i class="fas fa-arrow-alt-circle-down"></i>
+                          <span className="icon">
+                            <i className="fas fa-arrow-alt-circle-down"></i>
                           </span>
                         </span>
                         <span className="tag is-warning">{comment.downs}</span>
@@ -443,8 +444,8 @@ export default class AdminDashboard extends React.Component {
                     <div className="control">
                       <div className="tags has-addons">
                         <span className="tag">
-                          <span class="icon">
-                            <i class="fas fa-arrow-alt-circle-up"></i>
+                          <span className="icon">
+                            <i className="fas fa-arrow-alt-circle-up"></i>
                           </span>
                         </span>
                         <span className="tag is-success">{comment.ups}</span>
@@ -453,8 +454,8 @@ export default class AdminDashboard extends React.Component {
                     <div className="control">
                       <div className="tags has-addons">
                         <span className="tag">
-                          <span class="icon">
-                            <i class="fas fa-arrow-alt-circle-down"></i>
+                          <span className="icon">
+                            <i className="fas fa-arrow-alt-circle-down"></i>
                           </span>
                         </span>
                         <span className="tag is-warning">{comment.downs}</span>
@@ -535,7 +536,7 @@ export default class AdminDashboard extends React.Component {
           </h1>
           <div className="tags has-addons">
             <span className="tag is-info">Comments</span>
-            <span className="tag">{this.state.comments.length}</span>
+            <span className="tag">{this.props.commentCount}</span>
           </div>
         </nav>
         {!this.state.newOserToggle && <div className="field">
@@ -581,7 +582,7 @@ export default class AdminDashboard extends React.Component {
         </div>}
         <div className="tile is-ancestor">
           <div className="tile is-parent">
-            <div className="tile is-child box" style={{overflowX: 'scroll'}}>
+            <div className="tile is-child box" style={{overflowX: 'auto'}}>
               <p className="title">Oser Central</p>
               <table className="table is-striped is-fullwidth is-hoverable">
                 <thead>
@@ -624,9 +625,21 @@ $(document).ready(() => {
   const homeIndexData = document.getElementById('home-index-data');
   const oserData = JSON.parse(homeIndexData.getAttribute('data-osers'));
   const commentData = JSON.parse(homeIndexData.getAttribute('data-comments'));
+  const commentCountData = JSON.parse(homeIndexData.getAttribute('data-comment-count'));
+  const currentOserData = JSON.parse(homeIndexData.getAttribute('data-current-oser'));
+  const loggedInData = JSON.parse(homeIndexData.getAttribute('data-logged-in'));
   let section = document.createElement('section');
   section.className = 'section';
   const footer = document.getElementById('footer');
   const container = document.body.insertBefore(section, footer);
-  render(<AdminDashboard osers={oserData} comments={commentData} />, container);
+  render(
+    <AdminDashboard
+      osers={oserData}
+      comments={commentData}
+      commentCount={commentCountData}
+      currentOser={currentOserData}
+      loggedIn={loggedInData}
+    />,
+    container
+  );
 });

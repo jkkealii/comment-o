@@ -16,7 +16,10 @@
     <nav class="navbar is-transparent">
       <div class="container">
         <div class="navbar-brand">
-          <a class="navbar-item" href="/">
+          <a class="navbar-item navbar-redirect" href="/">
+            <span class="title icon is-large" style="margin-bottom: unset;">
+              <i class="fas fa-copyright" style="height: 2rem; width: 2rem"></i>
+            </span>
             <h2 class="title">Comment-O</h2>
           </a>
           <div class="navbar-burger burger" data-target="transparent-navbar">
@@ -28,36 +31,45 @@
 
         <div id="transparent-navbar" class="navbar-menu">
           <div class="navbar-start">
-            <a class="navbar-item" href="/">
+            <a class="navbar-item navbar-redirect" href="/">
               Home
             </a>
-            <a class="navbar-item" href="/osers/all">
+            <a class="navbar-item navbar-redirect" href="/osers/all">
               Osers
             </a>
-            <a class="navbar-item" href="/comments/all">
+            <a class="navbar-item navbar-redirect" href="/comments/all">
               Comments
             </a>
           </div>
 
-          <div class="navbar-end">
-            <div class="navbar-item has-dropdown is-hoverable">
-              <a class="navbar-link" href="#">
-                Oser
-              </a>
-              <div class="navbar-dropdown is-boxed">
-                <a class="navbar-item" href="#">
-                  Profile
+          <% if logged_in? %>
+            <div class="navbar-end">
+              <div class="navbar-item has-dropdown is-hoverable">
+                <a class="navbar-link navbar-redirect" href="/osers/<%= current_oser.id %>">
+                  <%= current_oser.username %>
                 </a>
-                <hr class="navbar-divider">
-                <a class="navbar-item" href="#">
-                  Preferences
-                </a>
-                <a class="navbar-item is-active" href="#">
-                  Log out
-                </a>
+                <div class="navbar-dropdown is-boxed">
+                  <a class="navbar-item navbar-redirect" href="/osers/<%= current_oser.id %>">
+                    Profile
+                  </a>
+                  <hr class="navbar-divider">
+                  <a class="navbar-item navbar-redirect" href="#">
+                    Preferences
+                  </a>
+                  <%= link_to "Log out", logout_path, method: :delete, class: "navbar-item" %>
+                </div>
               </div>
             </div>
-          </div>
+          <% else %>
+            <div class="navbar-end">
+              <a class="navbar-item navbar-redirect" href="/signup">
+                Sign Up
+              </a>
+              <a class="navbar-item navbar-redirect" href="/login">
+                Log In
+              </a>
+            </div>
+          <% end %>
         </div>
       </div>
     </nav>

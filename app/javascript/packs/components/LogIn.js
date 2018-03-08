@@ -2,20 +2,17 @@ import React from 'react';
 import {} from 'jquery';
 import { render } from 'react-dom';
 
-export default class SignUp extends React.Component {
+export default class LogIn extends React.Component {
   constructor() {
     super();
     this.state = {
-      passwordsMatch: true,
       username: undefined,
       password: undefined,
-      passwordConfirmation: undefined,
-      progress: 0
     }
 
     this._handleEditOsername = this._handleEditOsername.bind(this);
     this._handlePasswordChange = this._handlePasswordChange.bind(this);
-    this._handleCreateOser = this._handleCreateOser.bind(this);
+    this._handleLogIn = this._handleLogIn.bind(this);
   }
 
   _handleEditOsername(event) {
@@ -31,39 +28,23 @@ export default class SignUp extends React.Component {
 
   _handlePasswordChange(event) {
     let target = event.currentTarget;
-    let password;
-    let passwordConfirmation;
-    if (target.id === 'password') {
-      password = target.value;
-      passwordConfirmation = this.state.passwordConfirmation;
-    } else {
-      password = this.state.password;
-      passwordConfirmation = target.value;
-    }
-    let progress = password.length;
-    let passwordsMatch = passwordConfirmation !== '' && password === passwordConfirmation;
-    this.setState({
-      passwordsMatch,
-      password,
-      passwordConfirmation,
-      progress
-    });
+    let password = target.value;
+    this.setState({password});
   }
 
-  _handleCreateOser() {
+  _handleLogIn() {
     $.ajax({
-      url: '/osers',
+      url: '/login',
       type: 'POST',
       dataType: 'JSON',
       data: {
-        oser: {
+        session: {
           username: this.state.username,
-          password: this.state.password,
-          password_confirmation: this.state.passwordConfirmation
+          password: this.state.password
         }
       },
       success: (data) => {
-        alert('Sign up successful!');
+        alert('Log in successful!');
         window.location = '/';
       },
       error: (xhr) => {
@@ -74,25 +55,16 @@ export default class SignUp extends React.Component {
   }
 
   render() {
-    let passwordConfirmationClass = this.state.passwordsMatch ? "input is-large" : "input is-large is-danger";
-    let progressClass = "progress is-small help";
-    if (this.state.progress > 20) {
-      progressClass += " is-success";
-    } else if (this.state.progress > 10) {
-      progressClass += " is-warning";
-    } else {
-      progressClass += " is-danger";
-    }
     return(
       <div className="container">
-        <section className="hero is-primary is-bold">
+        <section className="hero is-light is-bold">
           <div className="hero-body">
             <div className="container has-text-centered">
               <h1 className="title">
-                Come one, come all, join Comment&#8209;O today!
+                Welcome back, fellow Comment&#8209;O'er!
               </h1>
               <h2 className="subtitle">
-                Twitter is so 2000s, join the cool kids here!
+                Tell your friends about the newest, coolest hip internet place. (Here. Comment&#8209;O)
               </h2>
             </div>
           </div>
@@ -115,36 +87,19 @@ export default class SignUp extends React.Component {
                 <i className="fas fa-lock"></i>
               </span>
             </p>
-            <progress className={progressClass} value={this.state.progress} max="36">{this.state.progress}%</progress>
-          </div>
-          <div className="field">
-            <label className="label">Password Confirmation</label>
-            <p className="control has-icons-left has-icons-right">
-              <input className={passwordConfirmationClass} type="password" placeholder="Password Confirmation" onChange={this._handlePasswordChange}/>
-              <span className="icon is-small is-left">
-                <i className="fas fa-lock"></i>
-              </span>
-              {this.state.passwordsMatch && <span className="icon is-small is-right">
-                <i className="fas fa-check"></i>
-              </span>}
-              {!this.state.passwordsMatch && <span className="icon is-small is-right">
-                <i className="fas fa-times"></i>
-              </span>}
-            </p>
-            <p className="help">There is no way to recover your password once you have entered it here; beware!</p>
           </div>
           <nav className="level">
             <div className="level-left">
               <div className="level-item content">
-                <p>Already an Oser? Log in&nbsp;<a onClick={() => window.location = '/login'}>here</a></p>
+                <p>Don't have an account&#8209;o? Sign up&nbsp;<a onClick={() => window.location = '/signup'}>here</a></p>
               </div>
             </div>
             <div className="level-right">
               <div className="level-item">
                 <div className="field is-grouped is-grouped-right">
                   <p className="control">
-                    <button className="button is-large is-success" onClick={this._handleCreateOser}>
-                      Sign Up
+                    <button className="button is-large is-success" onClick={this._handleLogIn}>
+                      Log In
                     </button>
                   </p>
                 </div>
@@ -162,5 +117,5 @@ $(document).ready(() => {
   section.className = 'section';
   const footer = document.getElementById('footer');
   const container = document.body.insertBefore(section, footer);
-  render(<SignUp />, container);
+  render(<LogIn />, container);
 });

@@ -3,6 +3,7 @@ class HomeController < ApplicationController
 
   def index
     @comments = Comment.grab_comments(false, 5)
+    @comment_count = Comment.count
     @osers = Oser.grab_osers
 
     respond_to do |format|
@@ -14,10 +15,6 @@ class HomeController < ApplicationController
         }
       }
     end
-  end
-
-  def signup
-
   end
 
   def osers

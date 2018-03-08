@@ -7,21 +7,78 @@ export default class Comments extends React.Component {
     super(props);
     this.state = {
       comments: this.props.comments,
+      commentCount: this.props.commentCount,
+      newComment: '',
       expandedComments: []
     }
 
+    this._fetchComments = this._fetchComments.bind(this);
     this._handleUpVote = this._handleUpVote.bind(this);
     this._handleDownVote = this._handleDownVote.bind(this);
     this._handleExpandComment = this._handleExpandComment.bind(this);
     this._setCommentParentIds = this._setCommentParentIds.bind(this);
+    this._handleSubmitComment = this._handleSubmitComment.bind(this);
+    this._clearNewComment = this._clearNewComment.bind(this);
+  }
+
+  _fetchComments() {
+    $.ajax({
+      url: '/comments',
+      type: 'GET',
+      dataType: 'JSON',
+      success: (data) => {
+        this.setState({comments: data.comments, commentCount: data.comment_count});
+      }
+    });
   }
 
   _handleUpVote(event) {
     const id = parseInt(event.currentTarget.dataset.commentId);
+    if (this.props.loggedIn) {
+
+    } else {
+      alert("Log in or sign up to join the Comment\u2011O craziness!");
+    }
   }
 
   _handleDownVote(event) {
     const id = parseInt(event.currentTarget.dataset.commentId);
+    if (this.props.loggedIn) {
+
+    } else {
+      alert("Log in or sign up to join the Comment\u2011O craziness!");
+    }
+  }
+
+  _handleSubmitComment() {
+    if (this.newComment.value === '') {
+      alert('Your comment is blank! Gimme something to work with here.');
+    } else {
+      $.ajax({
+        url: '/comments',
+        type: 'POST',
+        dataType: 'JSON',
+        data: {
+          comment: {
+            content: this.newComment.value,
+            oser_id: this.props.currentOser.id
+          }
+        },
+        success: (data) => {
+          alert('New comment created!');
+          this._clearNewComment();
+          this._fetchComments();
+        },
+        error: (xhr) => {
+          let errors = $.parseJSON(xhr.responseText).errors;
+          alert(errors);
+        }
+      });
+    }
+  }
+
+  _clearNewComment() {
+    $('#new-comment').val('');
   }
 
   _setCommentParentIds(commentId, parentIds) {
@@ -107,29 +164,31 @@ export default class Comments extends React.Component {
                 Total comment count:
               </h1>
               <h2 className="subtitle">
-                {this.props.commentCount}
+                {this.state.commentCount}
               </h2>
             </div>
           </div>
         </section>
-        <div className="field">
-          <label className="label">New Comment</label>
-          <div className="control">
-            <textarea className="textarea" placeholder="Comment on life!" rows="2" ref={newComment => this.newComment = newComment}></textarea>
+        {this.props.loggedIn && <div>
+          <div className="field">
+            <label className="label">New Comment</label>
+            <div className="control">
+              <textarea className="textarea" id="new-comment" placeholder="Comment on life!" rows="2" ref={newComment => this.newComment = newComment}></textarea>
+            </div>
           </div>
-        </div>
-        <div className="field is-grouped is-grouped-right">
-          <p className="control">
-            <a className="button is-info">
-              Submit
-            </a>
-          </p>
-          <p className="control">
-            <a className="button is-light">
-              Clear
-            </a>
-          </p>
-        </div>
+          <div className="field is-grouped is-grouped-right">
+            <p className="control">
+              <a className="button is-info" onClick={this._handleSubmitComment}>
+                Submit
+              </a>
+            </p>
+            <p className="control">
+              <a className="button is-light" onClick={this._clearNewComment}>
+                Clear
+              </a>
+            </p>
+          </div>
+        </div>}
         {comments}
       </div>
     );
@@ -216,18 +275,18 @@ export class Comment extends React.Component {
           <nav className="level">
             <div className="level-left" style={{alignItems: 'left', justifyContent: 'left'}}>
               <div className="level-item" style={{alignItems: 'left', justifyContent: 'left'}}>
-                <a className="has-text-info" style={{marginRight: '0.5rem'}}>
+                <a className="has-text-info" title="Comment" style={{marginRight: '0.5rem'}}>
                   <span className="icon is-small"><i className="fas fa-reply"></i></span>
                 </a>
-                <a className="has-text-success" data-comment-id={this.props.comment.id} onClick={this.props.onUpVote} style={{marginRight: '0.5rem'}}>
+                <a className="has-text-success" title="Up-vote" data-comment-id={this.props.comment.id} onClick={this.props.onUpVote} style={{marginRight: '0.5rem'}}>
                   <span className="icon is-small"><i className="fas fa-arrow-alt-circle-up"></i></span>
                 </a>
-                <a className="has-text-warning" data-comment-id={this.props.comment.id} onClick={this.props.onDownVote} style={{marginRight: '0.5rem'}}>
+                <a className="has-text-warning" title="Down-vote" data-comment-id={this.props.comment.id} onClick={this.props.onDownVote} style={{marginRight: '0.5rem'}}>
                   <span className="icon is-small"><i className="fas fa-arrow-alt-circle-down"></i></span>
                 </a>
                 {this.props.comment.children_count > 0 && <a className="has-text-info" data-comment-id={this.props.comment.id} onClick={this.props.onExpandComment} style={{marginRight: '0.5rem'}}>
-                  {!this.props.expanded && <span className="icon"><i className="fas fa-angle-down"></i></span>}
-                  {this.props.expanded && <span className="icon"><i className="fas fa-angle-up"></i></span>}
+                  {!this.props.expanded && <span className="icon" title={`${this.props.comment.children_count} nested comments`}><i className="fas fa-angle-down"></i></span>}
+                  {this.props.expanded && <span className="icon" title={`${this.props.comment.children_count} nested comments`}><i className="fas fa-angle-up"></i></span>}
                 </a>}
               </div>
             </div>
@@ -243,9 +302,19 @@ $(document).ready(() => {
   const homeCommentsData = document.getElementById('home-comments-data');
   const commentsData = JSON.parse(homeCommentsData.getAttribute('data-comments'));
   const commentCountData = JSON.parse(homeCommentsData.getAttribute('data-comment-count'));
+  const currentOserData = JSON.parse(homeCommentsData.getAttribute('data-current-oser'));
+  const loggedInData = JSON.parse(homeCommentsData.getAttribute('data-logged-in'));
   let section = document.createElement('section');
   section.className = 'section';
   const footer = document.getElementById('footer');
   const container = document.body.insertBefore(section, footer);
-  render(<Comments comments={commentsData} commentCount={commentCountData} />, container);
+  render(
+    <Comments
+      comments={commentsData}
+      commentCount={commentCountData}
+      currentOser={currentOserData}
+      loggedIn={loggedInData}
+    />,
+    container
+  );
 });

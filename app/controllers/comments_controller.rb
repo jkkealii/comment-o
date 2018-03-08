@@ -1,7 +1,7 @@
 class CommentsController < ApplicationController
   def index
     comments = Comment.grab_comments(params[:limit])
-    render json: { comments: comments }
+    render json: { comments: comments, comment_count: comments.size }
   end
 
   def create

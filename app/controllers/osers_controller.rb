@@ -7,6 +7,7 @@ class OsersController < ApplicationController
   def create
     oser = Oser.new(oser_params)
     render json: { errors: oser.errors.full_messages.join("\n") }, status: 422 unless oser.save
+    log_in oser if params[:admin].nil?
   end
 
   def update
@@ -17,6 +18,10 @@ class OsersController < ApplicationController
   def destroy
     oser = Oser.find(params[:id])
     render json: { errors: oser.errors.full_messages.join("\n") }, status: 422 unless oser.destroy
+  end
+
+  def signup
+    redirect_to root_url if logged_in?
   end
 
   private

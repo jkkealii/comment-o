@@ -41,9 +41,7 @@ class Comment < ApplicationRecord
   end
 
   def self.grab_comments(top_level_only = true, limit = nil, include_children = false)
-    eager_loads = [:oser]
-    eager_loads << :children if include_children
-    comment_records = Comment.order(created_at: :desc).includes(eager_loads)
+    comment_records = Comment.order(created_at: :desc).includes(:oser, :children)
     comment_records = comment_records.limit(limit.to_i) if limit.present?
     comment_records = comment_records.top_level if top_level_only
     comments = []
