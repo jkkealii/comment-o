@@ -9,25 +9,42 @@ export default class Comments extends React.Component {
       comments: this.props.comments,
       commentCount: this.props.commentCount,
       newComment: '',
-      expandedComments: []
+      expandedComments: [],
+      currentReplyTarget: null,
+      currentReply: ''
     }
 
     this._fetchComments = this._fetchComments.bind(this);
+    this._handleReply = this._handleReply.bind(this);
+    this._handleReplyChange = this._handleReplyChange.bind(this);
     this._handleUpVote = this._handleUpVote.bind(this);
     this._handleDownVote = this._handleDownVote.bind(this);
     this._handleExpandComment = this._handleExpandComment.bind(this);
     this._setCommentParentIds = this._setCommentParentIds.bind(this);
     this._handleSubmitComment = this._handleSubmitComment.bind(this);
+    this._handleSubmitReply = this._handleSubmitReply.bind(this);
     this._clearNewComment = this._clearNewComment.bind(this);
   }
 
-  _fetchComments() {
+  _fetchComments(replyTargetId = null) {
+    let childrenPopulated = this.state.expandedComments;
+    if (replyTargetId !== null) {
+      childrenPopulated.push(replyTargetId);
+    }
     $.ajax({
       url: '/comments',
       type: 'GET',
       dataType: 'JSON',
+      data: {
+        top_level: true,
+        children_populated: childrenPopulated.join()
+      },
       success: (data) => {
-        this.setState({comments: data.comments, commentCount: data.comment_count});
+        this.setState({
+          comments: data.comments,
+          commentCount: data.comment_count,
+          expandedComments: childrenPopulated
+        });
       }
     });
   }
@@ -81,6 +98,50 @@ export default class Comments extends React.Component {
     $('#new-comment').val('');
   }
 
+  _handleReply(event) {
+    const id = parseInt(event.currentTarget.dataset.commentId);
+    let currentReplyTarget;
+    if (this.state.currentReplyTarget === id) {
+      currentReplyTarget = null;
+    } else {
+      currentReplyTarget = id;
+    }
+    this.setState({currentReplyTarget});
+  }
+
+  _handleReplyChange(event) {
+    this.setState({currentReply: event.currentTarget.value});
+  }
+
+  _handleSubmitReply(event) {
+    const id = parseInt(event.currentTarget.dataset.commentId);
+    if (this.state.currentReply === '') {
+      alert('Your comment is blank! Gimme something to work with here.');
+    } else {
+      $.ajax({
+        url: '/comments',
+        type: 'POST',
+        dataType: 'JSON',
+        data: {
+          comment: {
+            content: this.state.currentReply,
+            oser_id: this.props.currentOser.id,
+            parent_id: id
+          }
+        },
+        success: (data) => {
+          alert('Comment created!');
+          this.setState({currentReply: '', currentReplyTarget: null});
+          this._fetchComments(id);
+        },
+        error: (xhr) => {
+          let errors = $.parseJSON(xhr.responseText).errors;
+          alert(errors);
+        }
+      });
+    }
+  }
+
   _setCommentParentIds(commentId, parentIds) {
     this[`commentParentIds_${commentId}`] = parentIds;
   }
@@ -99,7 +160,7 @@ export default class Comments extends React.Component {
         type: 'GET',
         dataType: 'JSON',
         data: {
-          parent_ids: this[`commentParentIds_${id}`]
+          parent_ids: this[`commentParentIds_${id}`].join()
         },
         success: (data) => {
           let parentIds = data.parent_ids;
@@ -146,6 +207,10 @@ export default class Comments extends React.Component {
         <Comment
           comment={comment}
           setParentIds={this._setCommentParentIds}
+          onReply={this._handleReply}
+          onReplyChange={this._handleReplyChange}
+          currentReplyTarget={this.state.currentReplyTarget}
+          onSubmitReply={this._handleSubmitReply}
           onUpVote={this._handleUpVote}
           onDownVote={this._handleDownVote}
           onExpandComment={this._handleExpandComment}
@@ -196,8 +261,8 @@ export default class Comments extends React.Component {
 }
 
 export class Comment extends React.Component {
-  constructor(props) {
-    super(props);
+  constructor() {
+    super();
   }
 
   componentDidMount() {
@@ -212,6 +277,10 @@ export class Comment extends React.Component {
           <Comment
             comment={child}
             setParentIds={this.props.setParentIds}
+            onReply={this.props.onReply}
+            onReplyChange={this.props.onReplyChange}
+            currentReplyTarget={this.props.currentReplyTarget}
+            onSubmitReply={this.props.onSubmitReply}
             onUpVote={this.props.onUpVote}
             onDownVote={this.props.onDownVote}
             onExpandComment={this.props.onExpandComment}
@@ -275,7 +344,7 @@ export class Comment extends React.Component {
           <nav className="level">
             <div className="level-left" style={{alignItems: 'left', justifyContent: 'left'}}>
               <div className="level-item" style={{alignItems: 'left', justifyContent: 'left'}}>
-                <a className="has-text-info" title="Comment" style={{marginRight: '0.5rem'}}>
+                <a className="has-text-info" title="Comment" data-comment-id={this.props.comment.id} onClick={this.props.onReply} style={{marginRight: '0.5rem'}}>
                   <span className="icon is-small"><i className="fas fa-reply"></i></span>
                 </a>
                 <a className="has-text-success" title="Up-vote" data-comment-id={this.props.comment.id} onClick={this.props.onUpVote} style={{marginRight: '0.5rem'}}>
@@ -291,7 +360,49 @@ export class Comment extends React.Component {
               </div>
             </div>
           </nav>
+          {this.props.currentReplyTarget === this.props.comment.id &&
+            <CommentReply
+              parentId={this.props.comment.id}
+              onChange={this.props.onReplyChange}
+              onCancelReply={this.props.onReply}
+              onSubmitReply={this.props.onSubmitReply}
+            />
+          }
           {children}
+        </div>
+      </article>
+    );
+  }
+}
+
+export class CommentReply extends React.Component {
+  constructor() {
+    super();
+  }
+
+  render() {
+    return(
+      <article className="media">
+        <figure className="media-left">
+        </figure>
+        <div className="media-content">
+          <div className="field">
+            <p className="control">
+              <textarea className="textarea is-small" placeholder="Add a comment..." rows="2" onChange={this.props.onChange}></textarea>
+            </p>
+          </div>
+          <div className="field is-grouped is-grouped-right">
+            <p className="control">
+              <a className="button is-info is-small" data-comment-id={this.props.parentId} onClick={this.props.onSubmitReply}>
+                Submit
+              </a>
+            </p>
+            <p className="control">
+              <a className="button is-light is-small" onClick={this.props.onCancelReply}>
+                Cancel
+              </a>
+            </p>
+          </div>
         </div>
       </article>
     );

@@ -63,6 +63,7 @@ export default class AdminDashboard extends React.Component {
       type: 'GET',
       dataType: 'JSON',
       data: {
+        top_level: false,
         limit: 5
       },
       success: (data) => {
