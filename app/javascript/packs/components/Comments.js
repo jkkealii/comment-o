@@ -2,7 +2,7 @@ import React from 'react';
 import {} from 'jquery';
 import { render } from 'react-dom';
 
-export default class Comments extends React.Component {
+export class Comments extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -221,8 +221,8 @@ export default class Comments extends React.Component {
       );
     });
     return(
-      <div className="container">
-        <section className="hero is-info is-bold" style={{marginBottom: '1.5rem'}}>
+      <div className={this.props.module ? "" : "container"}>
+        {!this.props.module && <section className="hero is-info is-bold" style={{marginBottom: '1.5rem'}}>
           <div className="hero-body">
             <div className="container">
               <h1 className="title">
@@ -233,8 +233,8 @@ export default class Comments extends React.Component {
               </h2>
             </div>
           </div>
-        </section>
-        {this.props.loggedIn && <div>
+        </section>}
+        {this.props.loggedIn && this.props.showNewComment && <div>
           <div className="field">
             <label className="label">New Comment</label>
             <div className="control">
@@ -411,21 +411,25 @@ export class CommentReply extends React.Component {
 
 $(document).ready(() => {
   const homeCommentsData = document.getElementById('home-comments-data');
-  const commentsData = JSON.parse(homeCommentsData.getAttribute('data-comments'));
-  const commentCountData = JSON.parse(homeCommentsData.getAttribute('data-comment-count'));
-  const currentOserData = JSON.parse(homeCommentsData.getAttribute('data-current-oser'));
-  const loggedInData = JSON.parse(homeCommentsData.getAttribute('data-logged-in'));
-  let section = document.createElement('section');
-  section.className = 'section';
-  const footer = document.getElementById('footer');
-  const container = document.body.insertBefore(section, footer);
-  render(
-    <Comments
-      comments={commentsData}
-      commentCount={commentCountData}
-      currentOser={currentOserData}
-      loggedIn={loggedInData}
-    />,
-    container
-  );
+  if (homeCommentsData !== null) {
+    const commentsData = JSON.parse(homeCommentsData.getAttribute('data-comments'));
+    const commentCountData = JSON.parse(homeCommentsData.getAttribute('data-comment-count'));
+    const currentOserData = JSON.parse(homeCommentsData.getAttribute('data-current-oser'));
+    const loggedInData = JSON.parse(homeCommentsData.getAttribute('data-logged-in'));
+    let section = document.createElement('section');
+    section.className = 'section';
+    const footer = document.getElementById('footer');
+    const container = document.body.insertBefore(section, footer);
+    render(
+      <Comments
+        comments={commentsData}
+        commentCount={commentCountData}
+        currentOser={currentOserData}
+        loggedIn={loggedInData}
+        module={false}
+        showNewComment={true}
+      />,
+      container
+    );
+  }
 });

@@ -302,7 +302,7 @@ export default class AdminDashboard extends React.Component {
             <td><input className="input" type="text" ref={username => this[`username_${oser.id}`] = username} onChange={this._handleEditOsername} defaultValue={oser.username}></input></td>
             <td><input className="input" type="text" ref={flair => this[`flair_${oser.id}`] = flair} defaultValue={oser.flair}></input></td>
             <td>{oser.comments.length}</td>
-            <td>{oser.joined}</td>
+            <td><time dateTime={oser.joined.datetime}>{oser.joined.formatted}</time></td>
             <td>
               <div className="buttons has-addons">
                 <a className="button is-white" data-oser-id={oser.id} onClick={this._handleEditOser}>
@@ -327,10 +327,10 @@ export default class AdminDashboard extends React.Component {
       } else {
         return(
           <tr key={oser.id}>
-            <td>{oser.username}</td>
-            <td>{oser.flair === null ? 'None' : oser.flair}</td>
-            <td>{oser.comments.length}</td>
-            <td>{oser.joined}</td>
+            <td onClick={() => window.open(`/osers/${oser.id}`)} >{oser.username}</td>
+            <td onClick={() => window.open(`/osers/${oser.id}`)} >{oser.flair === null ? 'None' : oser.flair}</td>
+            <td onClick={() => window.open(`/osers/${oser.id}`)} >{oser.comments.length}</td>
+            <td onClick={() => window.open(`/osers/${oser.id}`)} ><time dateTime={oser.joined.datetime}>{oser.joined.formatted}</time></td>
             <td>
               <div className="buttons has-addons">
                 <a className="button is-white" data-oser-id={oser.id} onClick={this._handleEditOser}>
