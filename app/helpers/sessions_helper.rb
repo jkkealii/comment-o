@@ -7,6 +7,10 @@ module SessionsHelper
     @current_oser ||= Oser.find_by(id: session[:oser_id])
   end
 
+  def current_oser_data
+    current_oser.as_json(only: [:id, :flair, :username, :role])
+  end
+
   def logged_in?
     !current_oser.nil?
   end

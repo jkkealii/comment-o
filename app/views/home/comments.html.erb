@@ -1,6 +1,6 @@
 <%= content_tag :div,
   id: "home-comments-data",
-  data: { comments: @comments, comment_count: @comment_count, current_oser: current_oser.as_json(only: [:id, :flair, :username]), logged_in: logged_in? } do %>
+  data: { comments: @comments, comment_count: @comment_count, current_oser: current_oser_data, logged_in: logged_in? } do %>
 <% end %>
 
 <%= javascript_pack_tag 'components/Comments' %>

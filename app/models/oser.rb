@@ -5,6 +5,16 @@ class Oser < ApplicationRecord
   validates :username, presence: true, length: { maximum: 36, message: 'Osername cannot be more than 36 characters' }, uniqueness: true
   validates :password, length: { minimum: 6, message: 'Password must be a minimum of 6 characters' }, allow_nil: true, if: :password
 
+  scope :admin, -> { where(role: Roles::ADMIN) }
+  scope :oser_role, -> { where(role: Roles::OSER) }
+
+  module Roles
+    ALL = [
+      ADMIN = 'admin'.freeze,
+      OSER = 'oser'.freeze
+    ].freeze
+  end
+
   def grab_comments
     comments = []
     self.comments.top_level.each do |comment|

@@ -11,7 +11,9 @@ export class Comments extends React.Component {
       newComment: '',
       expandedComments: [],
       currentReplyTarget: null,
-      currentReply: ''
+      currentReply: '',
+      currentEditTarget: null,
+      currentEdit: ''
     }
 
     this._fetchComments = this._fetchComments.bind(this);
@@ -24,6 +26,9 @@ export class Comments extends React.Component {
     this._handleSubmitComment = this._handleSubmitComment.bind(this);
     this._handleSubmitReply = this._handleSubmitReply.bind(this);
     this._clearNewComment = this._clearNewComment.bind(this);
+    this._handleEditComment = this._handleEditComment.bind(this);
+    this._handleUpdateComment = this._handleUpdateComment.bind(this);
+    this._handleEditChange = this._handleEditChange.bind(this);
   }
 
   _fetchComments(replyTargetId = null) {
@@ -92,6 +97,25 @@ export class Comments extends React.Component {
         }
       });
     }
+  }
+
+  _handleUpdateComment(event) {
+
+  }
+
+  _handleEditComment(event) {
+    const id = parseInt(event.currentTarget.dataset.commentId);
+    let currentEditTarget;
+    if (this.state.currentEditTarget === id) {
+      currentEditTarget = null;
+    } else {
+      currentEditTarget = id;
+    }
+    this.setState({currentEditTarget});
+  }
+
+  _handleEditChange(event) {
+    this.setState({currentEdit: event.currentTarget.value});
   }
 
   _clearNewComment() {
@@ -213,9 +237,15 @@ export class Comments extends React.Component {
           onSubmitReply={this._handleSubmitReply}
           onUpVote={this._handleUpVote}
           onDownVote={this._handleDownVote}
+          onEditComment={this._handleEditComment}
+          onEditChange={this._handleEditChange}
+          onUpdateComment={this._handleUpdateComment}
+          currentEditTarget={this.state.currentEditTarget}
           onExpandComment={this._handleExpandComment}
           expandedComments={this.state.expandedComments}
           expanded={this.state.expandedComments.includes(comment.id)}
+          currentOser={this.props.currentOser}
+          loggedIn={this.props.loggedIn}
           key={comment.id}
         />
       );
@@ -276,6 +306,7 @@ export class Comment extends React.Component {
         return(
           <Comment
             comment={child}
+            small={true}
             setParentIds={this.props.setParentIds}
             onReply={this.props.onReply}
             onReplyChange={this.props.onReplyChange}
@@ -283,9 +314,15 @@ export class Comment extends React.Component {
             onSubmitReply={this.props.onSubmitReply}
             onUpVote={this.props.onUpVote}
             onDownVote={this.props.onDownVote}
+            onEditComment={this.props.onEditComment}
+            onEditChange={this.props.onEditChange}
+            onUpdateComment={this.props.onUpdateComment}
+            currentEditTarget={this.props.currentEditTarget}
             onExpandComment={this.props.onExpandComment}
             expandedComments={this.props.expandedComments}
             expanded={this.props.expandedComments.includes(child.id)}
+            currentOser={this.props.currentOser}
+            loggedIn={this.props.loggedIn}
             key={child.id}
           />
         );
@@ -297,20 +334,37 @@ export class Comment extends React.Component {
         </figure>
         <div className="media-content">
           <div className="level" style={{marginBottom: '1rem'}}>
-            <div className="level-left" style={{alignItems: 'left', justifyContent: 'left'}}>
-              <div className="level-item" style={{alignItems: 'left', justifyContent: 'left'}}>
-                <div className="content">
-                  <strong>{this.props.comment.oser.username}</strong>
-                  {this.props.comment.oser.flair !== null && <small className="subtitle has-text-info" style={{verticalAlign: 'super', fontSize: '0.75rem'}}>&nbsp;- {this.props.comment.oser.flair}</small>}
-                  <br/>
-                  {this.props.comment.content}
-                  <br/>
-                  <div className="content is-small" style={{display: 'inline-block', marginLeft: '1rem', marginBottom: 'unset'}}>
-                    <time dateTime={this.props.comment.posted.datetime}>{this.props.comment.posted.formatted}</time>
+            <div className="level-item" style={{alignItems: 'left', justifyContent: 'left'}}>
+              <div className="content" style={{width: '100%'}}>
+                <strong>{this.props.comment.oser.username}</strong>
+                {this.props.comment.oser.flair !== null && <small className="subtitle has-text-info" style={{verticalAlign: 'super', fontSize: '0.75rem'}}>&nbsp;- {this.props.comment.oser.flair}</small>}
+                <br/>
+                {this.props.currentEditTarget !== this.props.comment.id && this.props.comment.content}
+                {this.props.currentEditTarget === this.props.comment.id &&
+                  <div className="field" style={{marginBottom: 'unset'}}>
+                    <p className="control">
+                      <textarea className="textarea" defaultValue={this.props.comment.content} rows="2" onChange={this.props.onEditChange}></textarea>
+                    </p>
+                    <div className="field is-grouped is-grouped-right">
+                      <p className="control">
+                        <a className="button is-info" data-comment-id={this.props.comment.id} onClick={this.props.onUpdateComment}>
+                          Update
+                        </a>
+                      </p>
+                      <p className="control">
+                        <a className="button is-light" data-comment-id={this.props.comment.id} onClick={this.props.onEditComment}>
+                          Cancel
+                        </a>
+                      </p>
+                    </div>
                   </div>
-                  <div className="content is-small" style={{display: 'inline-block', marginLeft: '1rem'}}>
-                    {this.props.comment.edited && <time dateTime={this.props.comment.updated.datetime}>Edited: {this.props.comment.updated.formatted}</time>}
-                  </div>
+                }
+                <br/>
+                <div className="content is-small" style={{display: 'inline-block', marginLeft: '1rem', marginBottom: 'unset'}}>
+                  <time dateTime={this.props.comment.posted.datetime}>{this.props.comment.posted.formatted}</time>
+                </div>
+                <div className="content is-small" style={{display: 'inline-block', marginLeft: '1rem'}}>
+                  {this.props.comment.edited && <time dateTime={this.props.comment.updated.datetime}>Edited: {this.props.comment.updated.formatted}</time>}
                 </div>
               </div>
             </div>
@@ -347,6 +401,9 @@ export class Comment extends React.Component {
                 <a className="has-text-info" title="Comment" data-comment-id={this.props.comment.id} onClick={this.props.onReply} style={{marginRight: '0.5rem'}}>
                   <span className="icon is-small"><i className="fas fa-reply"></i></span>
                 </a>
+                {this.props.loggedIn && this.props.currentOser.id === this.props.comment.oser.id && <a className="has-text-info" title="Edit" data-comment-id={this.props.comment.id} onClick={this.props.onEditComment} style={{marginRight: '0.5rem'}}>
+                  <span className="icon is-small"><i className="fas fa-edit"></i></span>
+                </a>}
                 <a className="has-text-success" title="Up-vote" data-comment-id={this.props.comment.id} onClick={this.props.onUpVote} style={{marginRight: '0.5rem'}}>
                   <span className="icon is-small"><i className="fas fa-arrow-alt-circle-up"></i></span>
                 </a>

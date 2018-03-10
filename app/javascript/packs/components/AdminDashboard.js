@@ -1,6 +1,7 @@
 import React from 'react';
 import {} from 'jquery';
 import { render } from 'react-dom';
+import {Comments, Comment, CommentReply} from '../components/Comments';
 
 export default class AdminDashboard extends React.Component {
   constructor(props) {
@@ -295,6 +296,7 @@ export default class AdminDashboard extends React.Component {
   }
 
   render() {
+    let adminUserLoggedIn = this.props.loggedIn && this.props.currentOser.role === 'admin';
     let osers = this.state.osers.map((oser) => {
       if (this.state.editingOsers.includes(oser.id)) {
         return(
@@ -303,7 +305,7 @@ export default class AdminDashboard extends React.Component {
             <td><input className="input" type="text" ref={flair => this[`flair_${oser.id}`] = flair} defaultValue={oser.flair}></input></td>
             <td>{oser.comments.length}</td>
             <td><time dateTime={oser.joined.datetime}>{oser.joined.formatted}</time></td>
-            <td>
+            {adminUserLoggedIn && <td>
               <div className="buttons has-addons">
                 <a className="button is-white" data-oser-id={oser.id} onClick={this._handleEditOser}>
                   <span className="icon has-text-link" title="Edit Oser">
@@ -321,7 +323,7 @@ export default class AdminDashboard extends React.Component {
                   </span>
                 </a>
               </div>
-            </td>
+            </td>}
           </tr>
         );
       } else {
@@ -331,7 +333,7 @@ export default class AdminDashboard extends React.Component {
             <td onClick={() => window.open(`/osers/${oser.id}`)} >{oser.flair === null ? 'None' : oser.flair}</td>
             <td onClick={() => window.open(`/osers/${oser.id}`)} >{oser.comments.length}</td>
             <td onClick={() => window.open(`/osers/${oser.id}`)} ><time dateTime={oser.joined.datetime}>{oser.joined.formatted}</time></td>
-            <td>
+            {adminUserLoggedIn && <td>
               <div className="buttons has-addons">
                 <a className="button is-white" data-oser-id={oser.id} onClick={this._handleEditOser}>
                   <span className="icon has-text-link" title="Edit Oser">
@@ -349,7 +351,7 @@ export default class AdminDashboard extends React.Component {
                   </span>
                 </a>
               </div>
-            </td>
+            </td>}
           </tr>
         );
       }
@@ -533,14 +535,14 @@ export default class AdminDashboard extends React.Component {
             <span className="tag">{this.state.osers.length}</span>
           </div>
           <h1 className="title">
-            Hello, Josh! Welcome back.
+            {this.props.loggedIn ? `Hello, ${this.props.currentOser.username}! Welcome back.` : 'Hello! Welcome to Comment\u2011O'}
           </h1>
           <div className="tags has-addons">
             <span className="tag is-info">Comments</span>
             <span className="tag">{this.props.commentCount}</span>
           </div>
         </nav>
-        {!this.state.newOserToggle && <div className="field">
+        {adminUserLoggedIn && !this.state.newOserToggle && <div className="field">
           <p className="control">
             <button className='button is-primary' onClick={this._handleToggleNewOser}>New Oser</button>
           </p>
@@ -592,7 +594,7 @@ export default class AdminDashboard extends React.Component {
                     <th>Flair</th>
                     <th><abbr title="Comments">Cmmts</abbr></th>
                     <th><abbr title="Date Created">Joined</abbr></th>
-                    <th>Actions</th>
+                    {adminUserLoggedIn && <th>Actions</th>}
                   </tr>
                 </thead>
                 <tbody>
@@ -604,7 +606,7 @@ export default class AdminDashboard extends React.Component {
                     <th>Flair</th>
                     <th><abbr title="Comments">Cmmts</abbr></th>
                     <th><abbr title="Date Created">Joined</abbr></th>
-                    <th>Actions</th>
+                    {adminUserLoggedIn && <th>Actions</th>}
                   </tr>
                 </tfoot>
               </table>
