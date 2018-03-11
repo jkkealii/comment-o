@@ -21,8 +21,7 @@ class CommentsController < ApplicationController
   end
 
   def children
-    initial_parent_ids = params[:parent_ids].nil? ? [] : params[:parent_ids].split(',')
-    children = Comment.find(params[:id]).child_comments(initial_parent_ids)
+    children = Comment.find(params[:id]).child_comments
     parent_ids = children.first[:parent_ids]
     render json: { children: children, parent_ids: parent_ids }
   end

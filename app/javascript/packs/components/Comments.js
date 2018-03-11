@@ -22,7 +22,6 @@ export class Comments extends React.Component {
     this._handleUpVote = this._handleUpVote.bind(this);
     this._handleDownVote = this._handleDownVote.bind(this);
     this._handleExpandComment = this._handleExpandComment.bind(this);
-    this._setCommentParentIds = this._setCommentParentIds.bind(this);
     this._handleSubmitComment = this._handleSubmitComment.bind(this);
     this._handleSubmitReply = this._handleSubmitReply.bind(this);
     this._clearNewComment = this._clearNewComment.bind(this);
@@ -198,10 +197,6 @@ export class Comments extends React.Component {
     }
   }
 
-  _setCommentParentIds(commentId, parentIds) {
-    this[`commentParentIds_${commentId}`] = parentIds;
-  }
-
   _handleExpandComment(event) {
     const id = parseInt(event.currentTarget.dataset.commentId);
     let expandedComments = this.state.expandedComments;
@@ -215,9 +210,6 @@ export class Comments extends React.Component {
         url: `/comments/${id}/children`,
         type: 'GET',
         dataType: 'JSON',
-        data: {
-          parent_ids: this[`commentParentIds_${id}`].join()
-        },
         success: (data) => {
           let parentIds = data.parent_ids;
           let comments = this.state.comments;
@@ -262,7 +254,6 @@ export class Comments extends React.Component {
       return(
         <Comment
           comment={comment}
-          setParentIds={this._setCommentParentIds}
           onReply={this._handleReply}
           onReplyChange={this._handleReplyChange}
           currentReplyTarget={this.state.currentReplyTarget}
@@ -327,10 +318,6 @@ export class Comment extends React.Component {
     super();
   }
 
-  componentDidMount() {
-    this.props.setParentIds(this.props.comment.id, this.props.comment.parent_ids);
-  }
-
   render() {
     let children = null;
     if (this.props.expanded) {
@@ -339,7 +326,6 @@ export class Comment extends React.Component {
           <Comment
             comment={child}
             small={true}
-            setParentIds={this.props.setParentIds}
             onReply={this.props.onReply}
             onReplyChange={this.props.onReplyChange}
             currentReplyTarget={this.props.currentReplyTarget}

@@ -1,14 +1,18 @@
 class Comment < ApplicationRecord
+  acts_as_nested_set
   belongs_to :oser
   belongs_to :parent, class_name: 'Comment'
   has_many :children, class_name: 'Comment', foreign_key: 'parent_id', dependent: :destroy
 
   validates :content, presence: true, length: { minimum: 1, message: 'Comment cannot be blank' }
 
-  scope :top_level, -> { where(parent_id: nil) }
   scope :children, -> { where('parent_id IS NOT NULL') }
 
-  def hashed(parent_ids = [])
+  def all_parent_ids
+    ancestors.pluck(:id)
+  end
+
+  def hashed
     {
       id: self.id,
       content: self.content,
@@ -16,7 +20,7 @@ class Comment < ApplicationRecord
       downs: self.downs,
       edited: self.edited,
       parent_id: self.parent_id,
-      parent_ids: parent_ids,
+      parent_ids: all_parent_ids,
       children_count: self.children.size,
       children: [],
       posted: {
@@ -35,12 +39,11 @@ class Comment < ApplicationRecord
     }
   end
 
-  def child_comments(parent_ids = [], children_populated_ids = [])
+  def child_comments(children_populated_ids = [])
     comments = []
-    parent_ids = parent_ids.include?(self.id.to_s) ? parent_ids : parent_ids << self.id.to_s
     children.includes(:oser, :children).each do |child|
-      comment_data = child.hashed(parent_ids)
-      comment_data[:children] = child.child_comments([], children_populated_ids) if children_populated_ids.include?(child.id.to_s)
+      comment_data = child.hashed
+      comment_data[:children] = child.child_comments(children_populated_ids) if children_populated_ids.include?(child.id.to_s)
       comments << comment_data
     end
     comments
@@ -49,11 +52,11 @@ class Comment < ApplicationRecord
   def self.grab_comments(top_level_only = true, limit = nil, children_populated_ids = [])
     comment_records = Comment.order(created_at: :desc).includes(:oser, :children)
     comment_records = comment_records.limit(limit.to_i) if limit.present?
-    comment_records = comment_records.top_level if top_level_only
+    comment_records = comment_records.roots if top_level_only
     comments = []
     comment_records.each do |comment|
       comment_data = comment.hashed
-      comment_data[:children] = comment.child_comments([], children_populated_ids) if children_populated_ids.include?(comment.id.to_s)
+      comment_data[:children] = comment.child_comments(children_populated_ids) if children_populated_ids.include?(comment.id.to_s)
       comments << comment_data
     end
     comments
