@@ -3,7 +3,7 @@ import {} from 'jquery';
 import { render } from 'react-dom';
 import {Comments, Comment, CommentReply} from '../components/Comments';
 
-export default class AdminDashboard extends React.Component {
+export default class Dashboard extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -356,144 +356,157 @@ export default class AdminDashboard extends React.Component {
         );
       }
     });
-    let comments = this.state.comments.map((comment, index) => {
-      if (this.state.editingComments.includes(comment.id)) {
-        let cardStyle = null;
-        if (index > 0) {
-          cardStyle = {
-            marginTop: '10px'
-          };
-        }
-        return(
-          <div className="card" style={cardStyle} key={`edit_${comment.id}`}>
-            <header className="level card-header" style={{marginBottom: 'unset'}}>
-              <div className="level-left">
-                <h5 className="level-item card-header-title">
-                  {comment.oser.username}
-                  {comment.oser.flair !== null && <p className="subtitle has-text-info" style={{verticalAlign: 'super', fontSize: '0.75rem'}}>&nbsp;- {comment.oser.flair}</p>}
-                </h5>
-              </div>
-              <div className="level-right">
-                <div className="level-item card-header-title">
-                  <div className="field is-grouped is-grouped-multiline">
-                    <div className="control">
-                      <div className="tags has-addons">
-                        <span className="tag">
-                          <span className="icon">
-                            <i className="fas fa-arrow-alt-circle-up"></i>
+    let comments;
+    if (adminUserLoggedIn) {
+      comments = this.state.comments.map((comment, index) => {
+        if (this.state.editingComments.includes(comment.id)) {
+          let cardStyle = null;
+          if (index > 0) {
+            cardStyle = {
+              marginTop: '10px'
+            };
+          }
+          return(
+            <div className="card" style={cardStyle} key={`edit_${comment.id}`}>
+              <header className="level card-header" style={{marginBottom: 'unset'}}>
+                <div className="level-left">
+                  <h5 className="level-item card-header-title">
+                    {comment.oser.username}
+                    {comment.oser.flair !== null && <p className="subtitle has-text-info" style={{verticalAlign: 'super', fontSize: '0.75rem'}}>&nbsp;- {comment.oser.flair}</p>}
+                  </h5>
+                </div>
+                <div className="level-right">
+                  <div className="level-item card-header-title">
+                    <div className="field is-grouped is-grouped-multiline">
+                      <div className="control">
+                        <div className="tags has-addons">
+                          <span className="tag">
+                            <span className="icon">
+                              <i className="fas fa-arrow-alt-circle-up"></i>
+                            </span>
                           </span>
-                        </span>
-                        <span className="tag is-success">{comment.ups}</span>
+                          <span className="tag is-success">{comment.ups}</span>
+                        </div>
                       </div>
-                    </div>
-                    <div className="control">
-                      <div className="tags has-addons">
-                        <span className="tag">
-                          <span className="icon">
-                            <i className="fas fa-arrow-alt-circle-down"></i>
+                      <div className="control">
+                        <div className="tags has-addons">
+                          <span className="tag">
+                            <span className="icon">
+                              <i className="fas fa-arrow-alt-circle-down"></i>
+                            </span>
                           </span>
-                        </span>
-                        <span className="tag is-warning">{comment.downs}</span>
+                          <span className="tag is-warning">{comment.downs}</span>
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            </header>
-            <div className="card-content">
-              <div className="content">
-                <textarea className="textarea" ref={content => this[`comment_${comment.id}`] = content} defaultValue={comment.content}></textarea>
-                <br/>
-                <nav className="level">
-                  <div className="level-left">
-                    <div className="level-item content is-small">
-                      <time dateTime={comment.posted.datetime}>{comment.posted.formatted}</time>
-                    </div>
-                  </div>
-                  <div className="level-right">
-                    <div className="content is-small">
-                      {comment.edited && <time dateTime={comment.updated.datetime}>Edited: {comment.updated.formatted}</time>}
-                    </div>
-                  </div>
-                </nav>
-              </div>
-            </div>
-            <footer className="card-footer">
-              <a data-comment-id={comment.id} className="card-footer-item has-text-success" onClick={this._handleUpdateComment}>Save</a>
-              <a data-comment-id={comment.id} className="card-footer-item" onClick={this._handleEditComment}>Edit</a>
-              <a data-comment-id={comment.id} className="card-footer-item has-text-danger" onClick={this._handleDeleteComment}>Delete</a>
-            </footer>
-          </div>
-        );
-      } else {
-        let cardStyle = null;
-        if (index > 0) {
-          cardStyle = {
-            marginTop: '10px'
-          };
-        }
-        return(
-          <div className="card" style={cardStyle} key={comment.id}>
-            <header className="level card-header" style={{marginBottom: 'unset'}}>
-              <div className="level-left">
-                <h5 className="level-item card-header-title">
-                  {comment.oser.username}
-                  {comment.oser.flair !== null && <p className="subtitle has-text-info" style={{verticalAlign: 'super', fontSize: '0.75rem'}}>&nbsp;- {comment.oser.flair}</p>}
-                </h5>
-              </div>
-              <div className="level-right">
-                <div className="level-item card-header-title">
-                  <div className="field is-grouped is-grouped-multiline">
-                    <div className="control">
-                      <div className="tags has-addons">
-                        <span className="tag">
-                          <span className="icon">
-                            <i className="fas fa-arrow-alt-circle-up"></i>
-                          </span>
-                        </span>
-                        <span className="tag is-success">{comment.ups}</span>
+              </header>
+              <div className="card-content">
+                <div className="content">
+                  <textarea className="textarea" ref={content => this[`comment_${comment.id}`] = content} defaultValue={comment.content}></textarea>
+                  <br/>
+                  <nav className="level">
+                    <div className="level-left">
+                      <div className="level-item content is-small">
+                        <time dateTime={comment.posted.datetime}>{comment.posted.formatted}</time>
                       </div>
                     </div>
-                    <div className="control">
-                      <div className="tags has-addons">
-                        <span className="tag">
-                          <span className="icon">
-                            <i className="fas fa-arrow-alt-circle-down"></i>
+                    <div className="level-right">
+                      <div className="content is-small">
+                        {comment.edited && <time dateTime={comment.updated.datetime}>Edited: {comment.updated.formatted}</time>}
+                      </div>
+                    </div>
+                  </nav>
+                </div>
+              </div>
+              <footer className="card-footer">
+                <a data-comment-id={comment.id} className="card-footer-item has-text-success" onClick={this._handleUpdateComment}>Save</a>
+                <a data-comment-id={comment.id} className="card-footer-item" onClick={this._handleEditComment}>Edit</a>
+                <a data-comment-id={comment.id} className="card-footer-item has-text-danger" onClick={this._handleDeleteComment}>Delete</a>
+              </footer>
+            </div>
+          );
+        } else {
+          let cardStyle = null;
+          if (index > 0) {
+            cardStyle = {
+              marginTop: '10px'
+            };
+          }
+          return(
+            <div className="card" style={cardStyle} key={comment.id}>
+              <header className="level card-header" style={{marginBottom: 'unset'}}>
+                <div className="level-left">
+                  <h5 className="level-item card-header-title">
+                    {comment.oser.username}
+                    {comment.oser.flair !== null && <p className="subtitle has-text-info" style={{verticalAlign: 'super', fontSize: '0.75rem'}}>&nbsp;- {comment.oser.flair}</p>}
+                  </h5>
+                </div>
+                <div className="level-right">
+                  <div className="level-item card-header-title">
+                    <div className="field is-grouped is-grouped-multiline">
+                      <div className="control">
+                        <div className="tags has-addons">
+                          <span className="tag">
+                            <span className="icon">
+                              <i className="fas fa-arrow-alt-circle-up"></i>
+                            </span>
                           </span>
-                        </span>
-                        <span className="tag is-warning">{comment.downs}</span>
+                          <span className="tag is-success">{comment.ups}</span>
+                        </div>
+                      </div>
+                      <div className="control">
+                        <div className="tags has-addons">
+                          <span className="tag">
+                            <span className="icon">
+                              <i className="fas fa-arrow-alt-circle-down"></i>
+                            </span>
+                          </span>
+                          <span className="tag is-warning">{comment.downs}</span>
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            </header>
-            <div className="card-content">
-              <div className="content">
-                {comment.content}
-                <br/>
-                <nav className="level">
-                  <div className="level-left">
-                    <div className="level-item content is-small">
-                      <time dateTime={comment.posted.datetime}>{comment.posted.formatted}</time>
+              </header>
+              <div className="card-content">
+                <div className="content">
+                  {comment.content}
+                  <br/>
+                  <nav className="level">
+                    <div className="level-left">
+                      <div className="level-item content is-small">
+                        <time dateTime={comment.posted.datetime}>{comment.posted.formatted}</time>
+                      </div>
                     </div>
-                  </div>
-                  <div className="level-right">
-                    <div className="level-item content is-small">
-                      {comment.edited && <time dateTime={comment.updated.datetime}>Edited: {comment.updated.formatted}</time>}
+                    <div className="level-right">
+                      <div className="level-item content is-small">
+                        {comment.edited && <time dateTime={comment.updated.datetime}>Edited: {comment.updated.formatted}</time>}
+                      </div>
                     </div>
-                  </div>
-                </nav>
+                  </nav>
+                </div>
               </div>
+              <footer className="card-footer">
+                <a data-comment-id={comment.id} className="card-footer-item" onClick={this._handleEditComment}>Edit</a>
+                <a data-comment-id={comment.id} className="card-footer-item has-text-danger" onClick={this._handleDeleteComment}>Delete</a>
+              </footer>
             </div>
-            <footer className="card-footer">
-              <a data-comment-id={comment.id} className="card-footer-item" onClick={this._handleEditComment}>Edit</a>
-              <a data-comment-id={comment.id} className="card-footer-item has-text-danger" onClick={this._handleDeleteComment}>Delete</a>
-            </footer>
-          </div>
-        );
-      }
-    });
+          );
+        }
+      });
+    } else {
+      comments =
+        <Comments
+          comments={this.state.comments}
+          commentCount={this.state.comments.length}
+          currentOser={this.props.currentOser}
+          loggedIn={this.props.loggedIn}
+          module={true}
+          showNewComment={false}
+        />;
+    }
     let passwordConfirmationClass = this.state.passwordsMatch ? "input" : "input is-danger";
     let newCommentModal = null;
     if (this.state.newCommentOser !== null) {
@@ -636,7 +649,7 @@ $(document).ready(() => {
   const footer = document.getElementById('footer');
   const container = document.body.insertBefore(section, footer);
   render(
-    <AdminDashboard
+    <Dashboard
       osers={oserData}
       comments={commentData}
       commentCount={commentCountData}

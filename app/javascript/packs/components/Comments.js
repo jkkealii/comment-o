@@ -125,12 +125,16 @@ export class Comments extends React.Component {
   _handleReply(event) {
     const id = parseInt(event.currentTarget.dataset.commentId);
     let currentReplyTarget;
-    if (this.state.currentReplyTarget === id) {
-      currentReplyTarget = null;
+    if (this.props.loggedIn) {
+      if (this.state.currentReplyTarget === id) {
+        currentReplyTarget = null;
+      } else {
+        currentReplyTarget = id;
+      }
+      this.setState({currentReplyTarget});
     } else {
-      currentReplyTarget = id;
+      alert("Log in or sign up to join the Comment\u2011O craziness!");
     }
-    this.setState({currentReplyTarget});
   }
 
   _handleReplyChange(event) {
@@ -264,7 +268,7 @@ export class Comments extends React.Component {
             </div>
           </div>
         </section>}
-        {this.props.loggedIn && this.props.showNewComment && <div>
+        {this.props.loggedIn && this.props.showNewComment && <div style={{marginBottom: '1rem'}}>
           <div className="field">
             <label className="label">New Comment</label>
             <div className="control">
@@ -333,43 +337,17 @@ export class Comment extends React.Component {
         <figure className="media-left">
         </figure>
         <div className="media-content">
-          <div className="level" style={{marginBottom: '1rem'}}>
-            <div className="level-item" style={{alignItems: 'left', justifyContent: 'left'}}>
-              <div className="content" style={{width: '100%'}}>
-                <strong>{this.props.comment.oser.username}</strong>
-                {this.props.comment.oser.flair !== null && <small className="subtitle has-text-info" style={{verticalAlign: 'super', fontSize: '0.75rem'}}>&nbsp;- {this.props.comment.oser.flair}</small>}
-                <br/>
-                {this.props.currentEditTarget !== this.props.comment.id && this.props.comment.content}
-                {this.props.currentEditTarget === this.props.comment.id &&
-                  <div className="field" style={{marginBottom: 'unset'}}>
-                    <p className="control">
-                      <textarea className="textarea" defaultValue={this.props.comment.content} rows="2" onChange={this.props.onEditChange}></textarea>
-                    </p>
-                    <div className="field is-grouped is-grouped-right">
-                      <p className="control">
-                        <a className="button is-info" data-comment-id={this.props.comment.id} onClick={this.props.onUpdateComment}>
-                          Update
-                        </a>
-                      </p>
-                      <p className="control">
-                        <a className="button is-light" data-comment-id={this.props.comment.id} onClick={this.props.onEditComment}>
-                          Cancel
-                        </a>
-                      </p>
-                    </div>
-                  </div>
-                }
-                <br/>
-                <div className="content is-small" style={{display: 'inline-block', marginLeft: '1rem', marginBottom: 'unset'}}>
-                  <time dateTime={this.props.comment.posted.datetime}>{this.props.comment.posted.formatted}</time>
-                </div>
-                <div className="content is-small" style={{display: 'inline-block', marginLeft: '1rem'}}>
-                  {this.props.comment.edited && <time dateTime={this.props.comment.updated.datetime}>Edited: {this.props.comment.updated.formatted}</time>}
+          <nav className="level" style={{marginBottom: 'unset'}}>
+            <div className="level-left">
+              <div className="level-item" style={{alignItems: 'flex-start', justifyContent: 'flex-start'}}>
+                <div className="content" style={{width: '100%'}}>
+                  <strong>{this.props.comment.oser.username}</strong>
+                  {this.props.comment.oser.flair !== null && <small className="subtitle has-text-info" style={{verticalAlign: 'super', fontSize: '0.75rem'}}>&nbsp;- {this.props.comment.oser.flair}</small>}
                 </div>
               </div>
             </div>
-            <div className="level-right" style={{marginTop: '0.75rem', alignItems: 'right', justifyContent: 'right'}}>
-              <div className="level-item card-header-title" style={{alignItems: 'right', justifyContent: 'right'}}>
+            <div className="level-right" style={{alignItems: 'flex-end', justifyContent: 'flex-end', marginTop: 'unset'}}>
+              <div className="level-item card-header-title" style={{alignItems: 'flex-end', justifyContent: 'flex-end'}}>
                 <div className="field is-grouped is-grouped-multiline">
                   <div className="control">
                     <div className="tags has-addons">
@@ -394,10 +372,46 @@ export class Comment extends React.Component {
                 </div>
               </div>
             </div>
+          </nav>
+          <div className="content" style={{width: '100%'}}>
+            {this.props.currentEditTarget !== this.props.comment.id &&
+              <div className="field" style={{marginBottom: 'unset'}}>
+                <div className="control">
+                  <div>
+                    {this.props.comment.content}
+                  </div>
+                </div>
+              </div>
+            }
+            {this.props.currentEditTarget === this.props.comment.id &&
+              <div className="field" style={{marginBottom: 'unset'}}>
+                <p className="control">
+                  <textarea className="textarea" defaultValue={this.props.comment.content} rows="2" onChange={this.props.onEditChange}></textarea>
+                </p>
+                <div className="field is-grouped is-grouped-right">
+                  <p className="control">
+                    <a className="button is-info" data-comment-id={this.props.comment.id} onClick={this.props.onUpdateComment}>
+                      Update
+                    </a>
+                  </p>
+                  <p className="control">
+                    <a className="button is-light" data-comment-id={this.props.comment.id} onClick={this.props.onEditComment}>
+                      Cancel
+                    </a>
+                  </p>
+                </div>
+              </div>
+            }
+            <div className="content is-small" style={{display: 'inline-block', marginLeft: '1rem', marginBottom: 'unset'}}>
+              <time dateTime={this.props.comment.posted.datetime}>{this.props.comment.posted.formatted}</time>
+            </div>
+            <div className="content is-small" style={{display: 'inline-block', marginLeft: '1rem'}}>
+              {this.props.comment.edited && <time dateTime={this.props.comment.updated.datetime}>Edited: {this.props.comment.updated.formatted}</time>}
+            </div>
           </div>
           <nav className="level">
-            <div className="level-left" style={{alignItems: 'left', justifyContent: 'left'}}>
-              <div className="level-item" style={{alignItems: 'left', justifyContent: 'left'}}>
+            <div className="level-left" style={{alignItems: 'flex-start', justifyContent: 'flex-start'}}>
+              <div className="level-item" style={{alignItems: 'flex-start', justifyContent: 'flex-start'}}>
                 <a className="has-text-info" title="Comment" data-comment-id={this.props.comment.id} onClick={this.props.onReply} style={{marginRight: '0.5rem'}}>
                   <span className="icon is-small"><i className="fas fa-reply"></i></span>
                 </a>
