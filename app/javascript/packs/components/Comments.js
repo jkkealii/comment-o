@@ -100,18 +100,46 @@ export class Comments extends React.Component {
   }
 
   _handleUpdateComment(event) {
-
+    const id = parseInt(event.currentTarget.dataset.commentId);
+    const initialComment = event.currentTarget.dataset.initialComment;
+    if (this.state.currentEdit === '') {
+      alert('Your comment is blank! Gimme something to work with here.');
+    } else if(this.state.currentEdit === initialComment) {
+      alert('No change detected.');
+    } else {
+      $.ajax({
+        url: `/comments/${id}`,
+        type: 'PATCH',
+        dataType: 'JSON',
+        data: {
+          comment: {
+            content: this.state.currentEdit
+          }
+        },
+        success: (data) => {
+          alert('Comment updated!');
+          this._fetchComments();
+        },
+        error: (xhr) => {
+          let errors = $.parseJSON(xhr.responseText).errors;
+          alert(errors);
+        }
+      });
+    }
+    this.setState({currentEditTarget: null, currentEdit: ''})
   }
 
   _handleEditComment(event) {
     const id = parseInt(event.currentTarget.dataset.commentId);
     let currentEditTarget;
+    let currentEdit = this.state.currentEdit;
     if (this.state.currentEditTarget === id) {
       currentEditTarget = null;
+      currentEdit = '';
     } else {
       currentEditTarget = id;
     }
-    this.setState({currentEditTarget});
+    this.setState({currentEditTarget, currentEdit});
   }
 
   _handleEditChange(event) {
@@ -390,7 +418,7 @@ export class Comment extends React.Component {
                 </p>
                 <div className="field is-grouped is-grouped-right">
                   <p className="control">
-                    <a className="button is-info" data-comment-id={this.props.comment.id} onClick={this.props.onUpdateComment}>
+                    <a className="button is-info" data-comment-id={this.props.comment.id} data-initial-comment={this.props.comment.content} onClick={this.props.onUpdateComment}>
                       Update
                     </a>
                   </p>
