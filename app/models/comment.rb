@@ -8,7 +8,7 @@ class Comment < ApplicationRecord
 
   scope :children, -> { where('parent_id IS NOT NULL') }
 
-  def all_parent_ids
+  def all_ancestor_ids
     ancestors.pluck(:id)
   end
 
@@ -20,7 +20,7 @@ class Comment < ApplicationRecord
       downs: self.downs,
       edited: self.edited,
       parent_id: self.parent_id,
-      parent_ids: child? ? all_parent_ids : [],
+      ancestor_ids: child? ? all_ancestor_ids : [],
       children_count: self.children.size,
       children: [],
       posted: {

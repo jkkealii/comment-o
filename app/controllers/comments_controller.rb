@@ -23,8 +23,8 @@ class CommentsController < ApplicationController
   def children
     comment = Comment.find(params[:id])
     children = comment.child_comments
-    parent_ids = children.first[:parent_ids]
-    render json: { children: children, parent_ids: parent_ids }
+    ancestor_ids = children.first[:ancestor_ids]
+    render json: { children: children, ancestor_ids: ancestor_ids }
   end
 
   private

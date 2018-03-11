@@ -151,16 +151,19 @@ export class Comments extends React.Component {
 
   _handleReply(event) {
     const id = parseInt(event.currentTarget.dataset.commentId);
+    const ancestorCount = parseInt(event.currentTarget.dataset.ancestorCount);
     let currentReplyTarget;
-    if (this.props.loggedIn) {
+    if (!this.props.loggedIn) {
+      alert("Log in or sign up to join the Comment\u2011O craziness!");
+    } else if (ancestorCount >= 5) {
+      alert("We do not currently support nested comments deeper than 5 :/");
+    } else {
       if (this.state.currentReplyTarget === id) {
         currentReplyTarget = null;
       } else {
         currentReplyTarget = id;
       }
       this.setState({currentReplyTarget});
-    } else {
-      alert("Log in or sign up to join the Comment\u2011O craziness!");
     }
   }
 
@@ -211,10 +214,10 @@ export class Comments extends React.Component {
         type: 'GET',
         dataType: 'JSON',
         success: (data) => {
-          let parentIds = data.parent_ids;
+          let ancestorIds = data.ancestor_ids;
           let comments = this.state.comments;
           let comment;
-          let topParentId = parseInt(parentIds.shift());
+          let topParentId = parseInt(ancestorIds.shift());
           for (let i = 0; i < comments.length; i++) {
             comment = comments[i];
             if (parseInt(comment.id) === topParentId) {
@@ -222,8 +225,8 @@ export class Comments extends React.Component {
             }
           }
           let nextParentId;
-          for (let i = 0; i < parentIds.length; i++) {
-            nextParentId = parseInt(parentIds[i]);
+          for (let i = 0; i < ancestorIds.length; i++) {
+            nextParentId = parseInt(ancestorIds[i]);
             for (let i = 0; i < comment.children.length; i++) {
               let child_comment = comment.children[i];
               if (parseInt(child_comment.id) === nextParentId) {
@@ -346,9 +349,20 @@ export class Comment extends React.Component {
         );
       });
     }
+    let dots = [];
+    if (this.props.comment.ancestor_ids.length > 0) {
+      for (let i = 0; i < this.props.comment.ancestor_ids.length; i++) {
+        dots.push(
+          <span className="icon" key={i} style={{marginRight: '-1rem'}}>
+            <i className="fas fa-angle-right"></i>
+          </span>
+        );
+      }
+    }
     return(
       <article className="media">
         <figure className="media-left">
+          {dots}
         </figure>
         <div className="media-content">
           <nav className="level" style={{marginBottom: 'unset'}}>
@@ -426,7 +440,7 @@ export class Comment extends React.Component {
           <nav className="level">
             <div className="level-left" style={{alignItems: 'flex-start', justifyContent: 'flex-start'}}>
               <div className="level-item" style={{alignItems: 'flex-start', justifyContent: 'flex-start'}}>
-                <a className="has-text-info" title="Comment" data-comment-id={this.props.comment.id} onClick={this.props.onReply} style={{marginRight: '0.5rem'}}>
+                <a className={this.props.comment.ancestor_ids.length >= 5 ? 'has-text-light' : 'has-text-info'} title="Comment" data-ancestor-count={this.props.comment.ancestor_ids.length} data-comment-id={this.props.comment.id} onClick={this.props.onReply} style={{marginRight: '0.5rem'}}>
                   <span className="icon is-small"><i className="fas fa-reply"></i></span>
                 </a>
                 {this.props.loggedIn && this.props.currentOser.id === this.props.comment.oser.id && <a className="has-text-info" title="Edit" data-comment-id={this.props.comment.id} onClick={this.props.onEditComment} style={{marginRight: '0.5rem'}}>
@@ -476,13 +490,13 @@ export class CommentReply extends React.Component {
               <textarea className="textarea is-small" placeholder="Add a comment..." rows="2" onChange={this.props.onChange}></textarea>
             </p>
           </div>
-          <div className="field is-grouped is-grouped-right">
-            <p className="control">
+          <div className="field is-grouped is-grouped-multiline" style={{marginBottom: 'auto', alignItems: 'flex-end', justifyContent: 'flex-end'}}>
+            <p className="control" style={{marginRight: 'unset'}}>
               <a className="button is-info is-small" data-comment-id={this.props.parentId} onClick={this.props.onSubmitReply}>
                 Submit
               </a>
             </p>
-            <p className="control">
+            <p className="control" style={{marginLeft: '0.75rem'}}>
               <a className="button is-light is-small" onClick={this.props.onCancelReply}>
                 Cancel
               </a>
