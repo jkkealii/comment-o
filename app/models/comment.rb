@@ -20,7 +20,7 @@ class Comment < ApplicationRecord
       downs: self.downs,
       edited: self.edited,
       parent_id: self.parent_id,
-      parent_ids: all_parent_ids,
+      parent_ids: child? ? all_parent_ids : [],
       children_count: self.children.size,
       children: [],
       posted: {
@@ -39,26 +39,28 @@ class Comment < ApplicationRecord
     }
   end
 
-  def child_comments(children_populated_ids = [])
+  def child_comments(children_populated_ids = children.pluck(:id))
     comments = []
-    children.includes(:oser).each do |child|
+    offspring = self.descendants.includes(:oser)
+    Comment.each_with_level(offspring.where(id: children_populated_ids).or(offspring.where(parent_id: children_populated_ids))) do |child, level|
+      next unless level == 1
       comment_data = child.hashed
-      comment_data[:children] = child.child_comments(children_populated_ids) if children_populated_ids.include?(child.id.to_s)
+      comment_data[:children] = child.child_comments(children_populated_ids) if children_populated_ids.include?(child.id)
       comments << comment_data
     end
     comments
   end
 
   def self.grab_comments(top_level_only = true, limit = nil, children_populated_ids = [])
-    comment_records = Comment.order(created_at: :desc).includes(:oser)
+    comment_records = Comment.includes(:oser)
     comment_records = comment_records.limit(limit.to_i) if limit.present?
     comment_records = comment_records.roots if top_level_only
     comments = []
     comment_records.each do |comment|
       comment_data = comment.hashed
-      comment_data[:children] = comment.child_comments(children_populated_ids) if children_populated_ids.include?(comment.id.to_s)
+      comment_data[:children] = comment.child_comments(children_populated_ids) if children_populated_ids.include?(comment.id)
       comments << comment_data
     end
-    comments
+    comments.sort! { |one, two| two[:id] <=> one[:id] }
   end
 end

@@ -1,6 +1,6 @@
 class CommentsController < ApplicationController
   def index
-    children_populated_ids = params[:children_populated].nil? ? [] : params[:children_populated].split(',')
+    children_populated_ids = params[:children_populated].nil? ? [] : params[:children_populated].split(',').map(&:to_i)
     comments = Comment.grab_comments((params[:top_level] || true), params[:limit], children_populated_ids)
     render json: { comments: comments, comment_count: Comment.count }
   end
@@ -21,7 +21,8 @@ class CommentsController < ApplicationController
   end
 
   def children
-    children = Comment.find(params[:id]).child_comments
+    comment = Comment.find(params[:id])
+    children = comment.child_comments
     parent_ids = children.first[:parent_ids]
     render json: { children: children, parent_ids: parent_ids }
   end
