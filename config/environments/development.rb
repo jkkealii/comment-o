@@ -31,6 +31,13 @@ Rails.application.configure do
 
   config.web_console.whitelisted_ips = '192.168.0.0/16'
 
+  config.after_initialize do
+    Bullet.enable = true
+    Bullet.bullet_logger = true
+    Bullet.console = true
+    Bullet.rails_logger = true
+  end
+
   # Don't care if the mailer can't send.
   config.action_mailer.raise_delivery_errors = false
 

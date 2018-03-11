@@ -1,7 +1,7 @@
 class Comment < ApplicationRecord
   acts_as_nested_set
   belongs_to :oser
-  belongs_to :parent, class_name: 'Comment'
+  belongs_to :parent, class_name: 'Comment', counter_cache: :children_count
   has_many :children, class_name: 'Comment', foreign_key: 'parent_id', dependent: :destroy
 
   validates :content, presence: true, length: { minimum: 1, message: 'Comment cannot be blank' }
@@ -41,7 +41,7 @@ class Comment < ApplicationRecord
 
   def child_comments(children_populated_ids = [])
     comments = []
-    children.includes(:oser, :children).each do |child|
+    children.includes(:oser).each do |child|
       comment_data = child.hashed
       comment_data[:children] = child.child_comments(children_populated_ids) if children_populated_ids.include?(child.id.to_s)
       comments << comment_data
@@ -50,7 +50,7 @@ class Comment < ApplicationRecord
   end
 
   def self.grab_comments(top_level_only = true, limit = nil, children_populated_ids = [])
-    comment_records = Comment.order(created_at: :desc).includes(:oser, :children)
+    comment_records = Comment.order(created_at: :desc).includes(:oser)
     comment_records = comment_records.limit(limit.to_i) if limit.present?
     comment_records = comment_records.roots if top_level_only
     comments = []

@@ -52,6 +52,9 @@ GEM
     binding_of_caller (0.8.0)
       debug_inspector (>= 0.0.1)
     builder (3.2.3)
+    bullet (5.7.4)
+      activesupport (>= 3.0.0)
+      uniform_notifier (~> 1.11.0)
     bulma-rails (0.6.2)
       sass (~> 3.2)
     byebug (10.0.0)
@@ -172,6 +175,7 @@ GEM
       thread_safe (~> 0.1)
     uglifier (4.1.6)
       execjs (>= 0.3.0, < 3)
+    uniform_notifier (1.11.0)
     web-console (3.5.1)
       actionview (>= 5.0)
       activemodel (>= 5.0)
@@ -195,6 +199,7 @@ DEPENDENCIES
   bcrypt (~> 3.1.7)
   better_errors
   binding_of_caller
+  bullet
   bulma-rails (~> 0.6.2)
   byebug
   capybara (~> 2.13)
