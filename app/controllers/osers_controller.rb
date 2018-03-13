@@ -1,6 +1,6 @@
 class OsersController < ApplicationController
   def index
-    osers = Oser.grab_osers
+    osers = Oser.grab_osers(false)
     render json: { osers: osers }
   end
 
@@ -11,20 +11,18 @@ class OsersController < ApplicationController
   end
 
   def show
-    oser = Oser.includes(:comments).find(params[:id])
+    oser = Oser.find(params[:id])
     logged_in = logged_in? && current_oser.id == oser.id
-    @oser = {
-      id: oser.id,
-      username: oser.username,
-      flair: oser.flair,
-      joined: {
-        formatted: oser.created_at.to_formatted_s(:long),
-        datetime: oser.created_at.strftime('%Y-%m-%dT%l:%M:%S')
-      },
-      logged_in: logged_in,
-      comments: oser.grab_comments,
-      replies: oser.grab_replies
-    }
+    @oser = oser.hashed(true)
+    @oser[:logged_in] = logged_in
+    respond_to do |format|
+      format.html
+      format.json {
+        render json: {
+          oser: @oser
+        }
+      }
+    end
   end
 
   def update
@@ -44,6 +42,6 @@ class OsersController < ApplicationController
   private
 
   def oser_params
-    params.require(:oser).permit(:username, :flair, :password, :password_confirmation)
+    params.require(:oser).permit(:username, :flair, :flair_color, :password, :password_confirmation)
   end
 end

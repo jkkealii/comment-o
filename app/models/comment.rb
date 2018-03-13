@@ -1,6 +1,7 @@
 class Comment < ApplicationRecord
   acts_as_nested_set
-  belongs_to :oser
+
+  belongs_to :oser, counter_cache: true
   belongs_to :parent, class_name: 'Comment', counter_cache: :children_count
   has_many :children, class_name: 'Comment', foreign_key: 'parent_id', dependent: :destroy
 
@@ -34,7 +35,8 @@ class Comment < ApplicationRecord
       oser: {
         id: self.oser.id,
         username: self.oser.username,
-        flair: self.oser.flair
+        flair: self.oser.flair,
+        flair_color: self.oser.flair_color
       }
     }
   end

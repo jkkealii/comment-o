@@ -30,6 +30,12 @@ export class Comments extends React.Component {
     this._handleEditChange = this._handleEditChange.bind(this);
   }
 
+  componentWillReceiveProps(nextProps) {
+    if (nextProps.profileChange !== undefined) {
+      this.setState(nextProps);
+    }
+  }
+
   _fetchComments(replyTargetId = null) {
     let childrenPopulated = this.state.expandedComments;
     if (replyTargetId !== null) {
@@ -370,7 +376,11 @@ export class Comment extends React.Component {
               <div className="level-item" style={{alignItems: 'flex-start', justifyContent: 'flex-start'}}>
                 <div className="content" style={{width: '100%'}}>
                   <strong>{this.props.comment.oser.username}</strong>
-                  {this.props.comment.oser.flair !== null && <small className="subtitle has-text-info" style={{verticalAlign: 'super', fontSize: '0.75rem'}}>&nbsp;- {this.props.comment.oser.flair}</small>}
+                  {this.props.comment.oser.flair !== null &&
+                    <small className={this.props.comment.oser.flair_color !== null ? 'subtitle is-6' : 'subtitle is-6 has-text-info'} style={{color: this.props.comment.oser.flair_color, verticalAlign: 'super', fontSize: '0.75rem'}}>
+                      &nbsp;- {this.props.comment.oser.flair}
+                    </small>
+                  }
                 </div>
               </div>
             </div>

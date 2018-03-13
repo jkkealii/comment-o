@@ -2,6 +2,8 @@ class Oser < ApplicationRecord
   has_many :comments, dependent: :destroy
 
   has_secure_password
+  validates :flair, length: { maximum: 17, message: 'Flair must be kept under 17 characters' }
+  validates :flair_color, length: { is: 7 }, css_hex_color: true, if: :flair_color
   validates :username, presence: true, length: { maximum: 36, message: 'Osername cannot be more than 36 characters' }, uniqueness: true
   validates :password, length: { minimum: 6, message: 'Password must be a minimum of 6 characters' }, allow_nil: true, if: :password
 
@@ -15,9 +17,25 @@ class Oser < ApplicationRecord
     ].freeze
   end
 
+  def hashed(include_comments = false)
+    {
+      id: self.id,
+      username: self.username,
+      flair: self.flair,
+      flair_color: self.flair_color,
+      joined: {
+        formatted: self.created_at.to_formatted_s(:long),
+        datetime: self.created_at.strftime('%Y-%m-%dT%l:%M:%S')
+      },
+      comments_count: self.comments.size,
+      comments: include_comments ? self.grab_comments : nil,
+      replies: include_comments ? self.grab_replies : nil
+    }
+  end
+
   def grab_comments
     comments = []
-    self.comments.top_level.each do |comment|
+    self.comments.roots.each do |comment|
       comments << comment.hashed
     end
     comments
@@ -31,36 +49,10 @@ class Oser < ApplicationRecord
     replies
   end
 
-  def self.grab_osers
+  def self.grab_osers(include_comments = false)
     osers = []
-    Oser.order(created_at: :desc).includes(:comments).each do |oser|
-      oser_data = {
-        username: oser.username,
-        id: oser.id,
-        flair: oser.flair,
-        joined: {
-          formatted: oser.created_at.to_formatted_s(:long),
-          datetime: oser.created_at.strftime('%Y-%m-%dT%l:%M:%S')
-        },
-        comments: []
-      }
-      oser.comments.each do |comment|
-        oser_data[:comments] << {
-          id: comment.id,
-          content: comment.content,
-          ups: comment.ups,
-          downs: comment.downs,
-          edited: comment.edited,
-          posted: {
-            formatted: comment.created_at.to_formatted_s(:long),
-            datetime: comment.created_at.strftime('%Y-%m-%dT%l:%M:%S')
-          },
-          updated: {
-            formatted: comment.updated_at.to_formatted_s(:long),
-            datetime: comment.updated_at.strftime('%Y-%m-%dT%l:%M:%S')
-          }
-        }
-      end
+    Oser.order(created_at: :desc).each do |oser|
+      oser_data = oser.hashed(include_comments)
       osers << oser_data
     end
     osers

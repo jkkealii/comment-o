@@ -1,7 +1,7 @@
 import React from 'react';
 import {} from 'jquery';
 import { render } from 'react-dom';
-import {Comments, Comment, CommentReply} from '../components/Comments';
+import { Comments, Comment, CommentReply } from '../components/Comments';
 
 export default class Dashboard extends React.Component {
   constructor(props) {
@@ -303,7 +303,7 @@ export default class Dashboard extends React.Component {
           <tr key={`edit_${oser.id}`}>
             <td><input className="input" type="text" ref={username => this[`username_${oser.id}`] = username} onChange={this._handleEditOsername} defaultValue={oser.username}></input></td>
             <td><input className="input" type="text" ref={flair => this[`flair_${oser.id}`] = flair} defaultValue={oser.flair}></input></td>
-            <td>{oser.comments.length}</td>
+            <td>{oser.comments_count}</td>
             <td><time dateTime={oser.joined.datetime}>{oser.joined.formatted}</time></td>
             {adminUserLoggedIn && <td>
               <div className="buttons has-addons">
@@ -331,7 +331,7 @@ export default class Dashboard extends React.Component {
           <tr key={oser.id}>
             <td onClick={() => window.open(`/osers/${oser.id}`)} >{oser.username}</td>
             <td onClick={() => window.open(`/osers/${oser.id}`)} >{oser.flair === null ? 'None' : oser.flair}</td>
-            <td onClick={() => window.open(`/osers/${oser.id}`)} >{oser.comments.length}</td>
+            <td onClick={() => window.open(`/osers/${oser.id}`)} >{oser.comments_count}</td>
             <td onClick={() => window.open(`/osers/${oser.id}`)} ><time dateTime={oser.joined.datetime}>{oser.joined.formatted}</time></td>
             {adminUserLoggedIn && <td>
               <div className="buttons has-addons">
