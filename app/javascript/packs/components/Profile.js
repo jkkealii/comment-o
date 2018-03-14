@@ -66,7 +66,7 @@ export default class Profile extends React.Component {
   }
 
   render() {
-    let currentOserProfile = this.props.currentOser.id === this.state.oser.id;
+    let currentOserProfile = this.props.loggedIn && this.props.currentOser.id === this.state.oser.id;
     let subtitle = "doesn't have any comments yet-o!";
     let commentCount = this.state.oser.comments_count;
     if (commentCount === 1) {

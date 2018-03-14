@@ -133,7 +133,7 @@ export class Oser extends React.Component {
             </div>
             <div style={{display: 'flex', alignItems: 'center', marginBottom: '0.75rem'}}>
               <div className="content is-small" style={{display: 'inline', marginBottom: 'unset'}}>
-                Joined: {this.props.oser.joined.formatted}
+                Joined: <time dateTime={this.props.oser.joined.datetime}>{this.props.oser.joined.formatted}</time>
               </div>
               {this.props.oser.comments_count > 0 && <a className="has-text-info" data-oser-id={this.props.oser.id} onClick={this.props.onViewOserComments} style={{marginLeft: '1rem'}}>
                 {!this.props.expanded && <span className="icon" title={`${this.props.oser.comments_count} comments`}><i className="fas fa-lg fa-angle-down"></i></span>}
