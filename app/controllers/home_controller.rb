@@ -18,7 +18,8 @@ class HomeController < ApplicationController
   end
 
   def osers
-    @osers = Oser.grab_osers
+    @osers = Oser.grab_osers(false)
+    @oser_count = Oser.count
   end
 
   def comments

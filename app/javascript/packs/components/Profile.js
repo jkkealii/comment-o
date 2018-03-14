@@ -77,7 +77,7 @@ export default class Profile extends React.Component {
     let comments =
       <Comments
         comments={this.state.oser.comments}
-        commentCount={this.state.oser.comments.length}
+        commentCount={this.state.oser.comments_count}
         currentOser={this.props.currentOser}
         loggedIn={this.props.loggedIn}
         module={true}

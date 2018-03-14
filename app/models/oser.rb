@@ -29,7 +29,8 @@ class Oser < ApplicationRecord
       },
       comments_count: self.comments.size,
       comments: include_comments ? self.grab_comments : nil,
-      replies: include_comments ? self.grab_replies : nil
+      # replies: include_comments ? self.grab_replies : nil
+      replies: nil # no use case yet
     }
   end
 

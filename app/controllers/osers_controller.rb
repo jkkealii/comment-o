@@ -35,6 +35,11 @@ class OsersController < ApplicationController
     render json: { errors: oser.errors.full_messages.join("\n") }, status: 422 unless oser.destroy
   end
 
+  def comments
+    oser = Oser.find(params[:id]).hashed(true)
+    render json: { oser: oser }
+  end
+
   def signup
     redirect_to root_url if logged_in?
   end

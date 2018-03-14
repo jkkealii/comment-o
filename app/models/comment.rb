@@ -5,7 +5,7 @@ class Comment < ApplicationRecord
   belongs_to :parent, class_name: 'Comment', counter_cache: :children_count
   has_many :children, class_name: 'Comment', foreign_key: 'parent_id', dependent: :destroy
 
-  validates :content, presence: true, length: { minimum: 1, message: 'Comment cannot be blank' }
+  validates :content, presence: true, length: { minimum: 1, too_short: 'Comment cannot be blank', maximum: 180, too_long: "Comment exceeds maximum length of %{count} characters" }
 
   scope :children, -> { where('parent_id IS NOT NULL') }
 

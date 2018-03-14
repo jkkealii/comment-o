@@ -372,7 +372,7 @@ export default class Dashboard extends React.Component {
                 <div className="level-left">
                   <h5 className="level-item card-header-title">
                     {comment.oser.username}
-                    {comment.oser.flair !== null && <p className="subtitle has-text-info" style={{verticalAlign: 'super', fontSize: '0.75rem'}}>&nbsp;- {comment.oser.flair}</p>}
+                    {comment.oser.flair !== null && <p className={comment.oser.flair_color !== null ? 'subtitle is-6' : 'subtitle is-6 has-text-info'} style={{color: comment.oser.flair_color, verticalAlign: 'super', fontSize: '0.75rem'}}>&nbsp;- {comment.oser.flair}</p>}
                   </h5>
                 </div>
                 <div className="level-right">
@@ -440,7 +440,7 @@ export default class Dashboard extends React.Component {
                 <div className="level-left">
                   <h5 className="level-item card-header-title">
                     {comment.oser.username}
-                    {comment.oser.flair !== null && <p className="subtitle has-text-info" style={{verticalAlign: 'super', fontSize: '0.75rem'}}>&nbsp;- {comment.oser.flair}</p>}
+                    {comment.oser.flair !== null && <p className={comment.oser.flair_color !== null ? 'subtitle is-6' : 'subtitle is-6 has-text-info'} style={{color: comment.oser.flair_color, verticalAlign: 'super', fontSize: '0.75rem'}}>&nbsp;- {comment.oser.flair}</p>}
                   </h5>
                 </div>
                 <div className="level-right">
