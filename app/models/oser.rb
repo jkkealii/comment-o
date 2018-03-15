@@ -2,6 +2,7 @@ class Oser < ApplicationRecord
   has_many :comments, dependent: :destroy
 
   has_secure_password
+  searchkick word_start: [:osername, :flair]
   validates :flair, length: { maximum: 17, message: 'Flair must be kept under 17 characters' }
   validates :flair_color, length: { is: 7 }, css_hex_color: true, if: :flair_color
   validates :username, presence: true, length: { maximum: 36, message: 'Osername cannot be more than 36 characters' }, uniqueness: true
@@ -48,6 +49,24 @@ class Oser < ApplicationRecord
       replies << reply.hashed
     end
     replies
+  end
+
+  # Used for searchkick gem. Run Oser.reindex after changing
+  def search_data
+    {
+      osername: username,
+      flair: flair
+    }
+  end
+
+  def self.search_and_format(query, fields = [])
+    results = []
+    if query.present? && fields.present?
+      results = Oser.search(query, fields: fields)
+    elsif query.present?
+      results = Oser.search(query)
+    end
+    results.map(&:hashed)
   end
 
   def self.grab_osers(include_comments = false)

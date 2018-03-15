@@ -9,10 +9,13 @@ export class Osers extends React.Component {
     this.state = {
       osers: this.props.osers,
       oserCount: this.props.oserCount,
-      expandedOsers: []
+      expandedOsers: [],
+      fieldFilters: []
     };
 
     this._handleViewOserComments = this._handleViewOserComments.bind(this);
+    this._handleSearch = this._handleSearch.bind(this);
+    this._handleFieldFilter = this._handleFieldFilter.bind(this);
   }
 
   _handleViewOserComments(event) {
@@ -47,6 +50,44 @@ export class Osers extends React.Component {
     }
   }
 
+  _handleSearch() {
+    let query = this.searchQuery.value;
+    let fields = this.state.fieldFilters.join(',');
+    $.ajax({
+      url: '/osers/search',
+      type: 'GET',
+      dataType: 'JSON',
+      data: {
+        query: query,
+        fields: fields
+      },
+      success: (data) => {
+        this.setState({osers: data.osers, expandedOsers: []});
+      },
+      error: (xhr) => {
+        let errors = $.parseJSON(xhr.responseText).errors;
+        alert(errors);
+      }
+    });
+  }
+
+  _handleFieldFilter(event) {
+    let field = event.currentTarget.dataset.field;
+    let fieldFilters = this.state.fieldFilters;
+    if (field === 'reset') {
+      this.setState({fieldFilters: []});
+    } else if (fieldFilters.includes(field)) {
+      fieldFilters.splice(fieldFilters.indexOf(field), 1);
+      this.setState({fieldFilters});
+    } else {
+      fieldFilters.push(field);
+      this.setState({fieldFilters});
+    }
+    if (this.searchQuery.value.length > 0) {
+      this._handleSearch();
+    }
+  }
+
   render() {
     let osers = this.state.osers.map((oser) => {
       return(
@@ -62,7 +103,7 @@ export class Osers extends React.Component {
     });
     return(
       <div className={this.props.module ? "" : "container"}>
-        {!this.props.module && <section className="hero is-primary is-bold" style={{marginBottom: '1.5rem'}}>
+        {!this.props.module && <section className="hero is-primary is-bold" style={{marginBottom: '1rem'}}>
           <div className="hero-body">
             <div className="container">
               <h1 className="title">
@@ -74,6 +115,32 @@ export class Osers extends React.Component {
             </div>
           </div>
         </section>}
+        <nav className="level">
+          <div className="level-left">
+            <form action="javascript:void(0);">
+              <div className="field has-addons">
+                <p className="control">
+                  <input className="input" type="text" placeholder="Search for osers" ref={searchQuery => this.searchQuery = searchQuery}/>
+                </p>
+                <p className="control">
+                  <button type="submit" className="button is-primary" onClick={this._handleSearch}>
+                    Search
+                  </button>
+                </p>
+              </div>
+            </form>
+          </div>
+          <div className="level-item">
+            <div className="box" style={{marginTop: '0.5rem'}}>
+              <div className="buttons">
+                <label className="label" style={{marginRight: '1rem'}}>Search fields:</label>
+                <span className={this.state.fieldFilters.includes('osername') ? 'button is-small is-active' : 'button is-small'} onClick={this._handleFieldFilter} data-field="osername">Osername</span>
+                <span className={this.state.fieldFilters.includes('flair') ? 'button is-small is-active' : 'button is-small'} onClick={this._handleFieldFilter} data-field="flair">Flair</span>
+                <span className="button is-small is-danger is-outlined" onClick={this._handleFieldFilter} data-field="reset">Reset</span>
+              </div>
+            </div>
+          </div>
+        </nav>
         {osers}
       </div>
     );

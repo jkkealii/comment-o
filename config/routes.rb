@@ -6,6 +6,7 @@ Rails.application.routes.draw do
   get '/comments/:id/children', to: 'comments#children'
 
   get '/osers/:id/comments', to: 'osers#comments'
+  get '/osers/search', to: 'osers#search'
   get '/signup', to: 'osers#signup'
 
   get '/login', to: 'sessions#new'

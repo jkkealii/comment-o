@@ -35,6 +35,13 @@ class OsersController < ApplicationController
     render json: { errors: oser.errors.full_messages.join("\n") }, status: 422 unless oser.destroy
   end
 
+  def search
+    query = params[:query].presence || '*'
+    fields = params[:fields].present? ? params[:fields].split(',').map(&:to_sym) : []
+    osers = Oser.search_and_format(query, fields)
+    render json: { osers: osers }
+  end
+
   def comments
     oser = Oser.find(params[:id]).hashed(true)
     render json: { oser: oser }
