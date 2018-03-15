@@ -13,7 +13,8 @@ export class Comments extends React.Component {
       currentReplyTarget: null,
       currentReply: '',
       currentEditTarget: null,
-      currentEdit: ''
+      currentEdit: '',
+      fieldFilters: []
     }
 
     this._fetchComments = this._fetchComments.bind(this);
@@ -28,6 +29,8 @@ export class Comments extends React.Component {
     this._handleEditComment = this._handleEditComment.bind(this);
     this._handleUpdateComment = this._handleUpdateComment.bind(this);
     this._handleEditChange = this._handleEditChange.bind(this);
+    this._handleSearch = this._handleSearch.bind(this);
+    this._handleFieldFilter = this._handleFieldFilter.bind(this);
   }
 
   componentWillReceiveProps(nextProps) {
@@ -258,6 +261,48 @@ export class Comments extends React.Component {
     }
   }
 
+  _handleSearch(fieldFilters) {
+    let fields = this.state.fieldFilters.join(',');
+    if (Array.isArray(fieldFilters)) {
+      fields = fieldFilters.join(',');
+    }
+    let query = this.searchQuery.value;
+    $.ajax({
+      url: '/comments/search',
+      type: 'GET',
+      dataType: 'JSON',
+      data: {
+        query: query,
+        fields: fields
+      },
+      success: (data) => {
+        this.setState({comments: data.comments, expandedComments: []});
+      },
+      error: (xhr) => {
+        let errors = $.parseJSON(xhr.responseText).errors;
+        alert(errors);
+      }
+    });
+  }
+
+  _handleFieldFilter(event) {
+    let field = event.currentTarget.dataset.field;
+    let fieldFilters = this.state.fieldFilters;
+    if (field === 'reset') {
+      fieldFilters = [];
+      this.setState({fieldFilters});
+    } else if (fieldFilters.includes(field)) {
+      fieldFilters.splice(fieldFilters.indexOf(field), 1);
+      this.setState({fieldFilters});
+    } else {
+      fieldFilters.push(field);
+      this.setState({fieldFilters});
+    }
+    if (this.searchQuery.value.length > 0) {
+      this._handleSearch(fieldFilters);
+    }
+  }
+
   render() {
     let comments = this.state.comments.map((comment) => {
       return(
@@ -316,6 +361,34 @@ export class Comments extends React.Component {
             </p>
           </div>
         </div>}
+        {!this.props.module && <nav className="level">
+          <div className="level-left">
+            <div className="level-item">
+              <form action="javascript:void(0);">
+                <div className="field has-addons">
+                  <p className="control">
+                    <input className="input" type="text" placeholder="Search comments" ref={searchQuery => this.searchQuery = searchQuery}/>
+                  </p>
+                  <p className="control">
+                    <button type="submit" className="button is-info" onClick={this._handleSearch}>
+                      Search
+                    </button>
+                  </p>
+                </div>
+              </form>
+            </div>
+          </div>
+          <div className="level-item">
+            <div className="box" style={{marginTop: '0.5rem'}}>
+              <div className="buttons">
+                <label className="label" style={{marginRight: '1rem'}}>Search fields:</label>
+                <span className={this.state.fieldFilters.includes('osername') ? 'button is-small is-active' : 'button is-small'} onClick={this._handleFieldFilter} data-field="osername">Oser</span>
+                <span className={this.state.fieldFilters.includes('content') ? 'button is-small is-active' : 'button is-small'} onClick={this._handleFieldFilter} data-field="content">Comment</span>
+                <span className="button is-small is-danger is-outlined" onClick={this._handleFieldFilter} data-field="reset">Reset</span>
+              </div>
+            </div>
+          </div>
+        </nav>}
         {comments}
       </div>
     );

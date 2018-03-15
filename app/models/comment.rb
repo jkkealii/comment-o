@@ -1,5 +1,6 @@
 class Comment < ApplicationRecord
   acts_as_nested_set
+  searchkick text_middle: [:osername, :content]
 
   belongs_to :oser, counter_cache: true
   belongs_to :parent, class_name: 'Comment', counter_cache: :children_count
@@ -8,6 +9,7 @@ class Comment < ApplicationRecord
   validates :content, presence: true, length: { minimum: 1, too_short: 'Comment cannot be blank', maximum: 180, too_long: "Comment exceeds maximum length of %{count} characters" }
 
   scope :children, -> { where('parent_id IS NOT NULL') }
+  scope :search_import, -> { includes(:oser) } # Used for searchkick gem; eager loading on indexing
 
   def all_ancestor_ids
     ancestors.pluck(:id)
@@ -51,6 +53,25 @@ class Comment < ApplicationRecord
       comments << comment_data
     end
     comments
+  end
+
+  # Used for searchkick gem. Run Comment.reindex after changing
+  def search_data
+    {
+      osername: self.oser.username,
+      content: self.content
+    }
+  end
+
+  def self.search_and_format(query, fields = [])
+    results = []
+    if query.present? && fields.present?
+      results = Comment.search(query, includes: [:oser], fields: fields, match: :text_middle)
+    elsif query.present?
+      results = Comment.search(query, includes: [:oser], match: :text_middle)
+    end
+    # Weird map call here because results is a Searchkick::Results object
+    results.map { |c| c }.keep_if(&:root?).map(&:hashed)
   end
 
   def self.grab_comments(top_level_only = true, limit = nil, children_populated_ids = [])

@@ -4,6 +4,7 @@ Rails.application.routes.draw do
   get '/comments/all', to: 'home#comments'
 
   get '/comments/:id/children', to: 'comments#children'
+  get '/comments/search', to: 'comments#search'
 
   get '/osers/:id/comments', to: 'osers#comments'
   get '/osers/search', to: 'osers#search'

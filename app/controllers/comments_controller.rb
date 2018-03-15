@@ -27,6 +27,13 @@ class CommentsController < ApplicationController
     render json: { children: children, ancestor_ids: ancestor_ids }
   end
 
+  def search
+    query = params[:query].presence || '*'
+    fields = params[:fields].present? ? params[:fields].split(',').map(&:to_sym) : []
+    comments = Comment.search_and_format(query, fields)
+    render json: { comments: comments }
+  end
+
   private
 
   def comment_params

@@ -62,9 +62,9 @@ class Oser < ApplicationRecord
   def self.search_and_format(query, fields = [])
     results = []
     if query.present? && fields.present?
-      results = Oser.search(query, fields: fields)
+      results = Oser.search(query, fields: fields, match: :word_start)
     elsif query.present?
-      results = Oser.search(query)
+      results = Oser.search(query, match: :word_start)
     end
     results.map(&:hashed)
   end

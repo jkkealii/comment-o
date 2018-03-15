@@ -117,18 +117,20 @@ export class Osers extends React.Component {
         </section>}
         <nav className="level">
           <div className="level-left">
-            <form action="javascript:void(0);">
-              <div className="field has-addons">
-                <p className="control">
-                  <input className="input" type="text" placeholder="Search for osers" ref={searchQuery => this.searchQuery = searchQuery}/>
-                </p>
-                <p className="control">
-                  <button type="submit" className="button is-primary" onClick={this._handleSearch}>
-                    Search
-                  </button>
-                </p>
-              </div>
-            </form>
+            <div className="level-item">
+              <form action="javascript:void(0);">
+                <div className="field has-addons">
+                  <p className="control">
+                    <input className="input" type="text" placeholder="Search for osers" ref={searchQuery => this.searchQuery = searchQuery}/>
+                  </p>
+                  <p className="control">
+                    <button type="submit" className="button is-primary" onClick={this._handleSearch}>
+                      Search
+                    </button>
+                  </p>
+                </div>
+              </form>
+            </div>
           </div>
           <div className="level-item">
             <div className="box" style={{marginTop: '0.5rem'}}>
