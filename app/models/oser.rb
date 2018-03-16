@@ -33,7 +33,7 @@ class Oser < ApplicationRecord
         datetime: self.created_at.strftime('%Y-%m-%dT%l:%M:%S')
       },
       comments_count: self.comments.size,
-      comments: include_comments ? self.grab_comments(children_populated_ids) : nil,
+      comments: include_comments ? self.grab_comments(children_populated_ids) : [],
       # replies: include_comments ? self.grab_replies : nil
       replies: nil # no use case yet
     }
@@ -75,10 +75,10 @@ class Oser < ApplicationRecord
     results.map(&:hashed)
   end
 
-  def self.grab_osers(include_comments = false)
+  def self.grab_osers(include_comments = false, expanded_osers = [], children_populated_ids = [])
     osers = []
     Oser.order(created_at: :desc).each do |oser|
-      oser_data = oser.hashed(include_comments)
+      oser_data = oser.hashed(include_comments && expanded_osers.include?(oser.id), children_populated_ids)
       osers << oser_data
     end
     osers

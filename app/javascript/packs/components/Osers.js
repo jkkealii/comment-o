@@ -7,6 +7,7 @@ export class Osers extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
+      currentOser: this.props.currentOser,
       osers: this.props.osers,
       oserCount: this.props.oserCount,
       expandedOsers: [],
@@ -16,6 +17,22 @@ export class Osers extends React.Component {
     this._handleViewOserComments = this._handleViewOserComments.bind(this);
     this._handleSearch = this._handleSearch.bind(this);
     this._handleFieldFilter = this._handleFieldFilter.bind(this);
+    this._fetchOsers = this._fetchOsers.bind(this);
+  }
+
+  _fetchOsers(currentOser = this.state.currentOser, childrenPopulated = null) {
+    $.ajax({
+      url: '/osers',
+      type: 'GET',
+      dataType: 'JSON',
+      data: {
+        expanded_osers: this.state.expandedOsers.join(','),
+        children_populated: childrenPopulated
+      },
+      success: (data) => {
+        this.setState({currentOser, osers: data.osers});
+      }
+    });
   }
 
   _handleViewOserComments(event) {
@@ -93,11 +110,12 @@ export class Osers extends React.Component {
       return(
         <Oser
           key={oser.id}
-          currentOser={this.props.currentOser}
+          currentOser={this.state.currentOser}
           loggedIn={this.props.loggedIn}
           oser={oser}
           expanded={this.state.expandedOsers.includes(oser.id)}
           onViewOserComments={this._handleViewOserComments}
+          onRefresh={this._fetchOsers}
         />
       );
     });
@@ -162,6 +180,7 @@ export class Oser extends React.Component {
         currentOser={this.props.currentOser}
         loggedIn={this.props.loggedIn}
         module={true}
+        onRefresh={this.props.onRefresh}
         showNewComment={false}
       />;
     return(

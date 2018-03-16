@@ -1,6 +1,8 @@
 class OsersController < ApplicationController
   def index
-    osers = Oser.grab_osers(false)
+    children_populated_ids = params[:children_populated].present? ? params[:children_populated].split(',').map(&:to_i) : []
+    expanded_osers = params[:expanded_osers].present? ? params[:expanded_osers].split(',').map(&:to_i) : []
+    osers = Oser.grab_osers(params[:expanded_osers].present?, expanded_osers, children_populated_ids)
     render json: { osers: osers }
   end
 
