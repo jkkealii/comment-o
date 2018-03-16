@@ -1,5 +1,9 @@
 class Oser < ApplicationRecord
   has_many :comments, dependent: :destroy
+  has_many :upvotes
+  has_many :upvoted_comments, through: :upvotes, dependent: :destroy
+  has_many :downvotes
+  has_many :downvoted_comments, through: :downvotes, dependent: :destroy
 
   has_secure_password
   searchkick word_start: [:osername, :flair]
@@ -18,7 +22,7 @@ class Oser < ApplicationRecord
     ].freeze
   end
 
-  def hashed(include_comments = false)
+  def hashed(include_comments = false, children_populated_ids = [])
     {
       id: self.id,
       username: self.username,
@@ -29,16 +33,18 @@ class Oser < ApplicationRecord
         datetime: self.created_at.strftime('%Y-%m-%dT%l:%M:%S')
       },
       comments_count: self.comments.size,
-      comments: include_comments ? self.grab_comments : nil,
+      comments: include_comments ? self.grab_comments(children_populated_ids) : nil,
       # replies: include_comments ? self.grab_replies : nil
       replies: nil # no use case yet
     }
   end
 
-  def grab_comments
+  def grab_comments(children_populated_ids = [])
     comments = []
     self.comments.roots.each do |comment|
-      comments << comment.hashed
+      hashed_comment = comment.hashed
+      hashed_comment[:children] = comment.child_comments(children_populated_ids) if children_populated_ids.include?(comment.id)
+      comments << hashed_comment
     end
     comments
   end

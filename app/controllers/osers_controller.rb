@@ -13,7 +13,8 @@ class OsersController < ApplicationController
   def show
     oser = Oser.find(params[:id])
     logged_in = logged_in? && current_oser.id == oser.id
-    @oser = oser.hashed(true)
+    children_populated_ids = params[:children_populated].present? ? params[:children_populated].split(',').map(&:to_i) : []
+    @oser = oser.hashed(true, children_populated_ids)
     @oser[:logged_in] = logged_in
     respond_to do |format|
       format.html

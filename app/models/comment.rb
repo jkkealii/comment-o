@@ -5,8 +5,27 @@ class Comment < ApplicationRecord
   belongs_to :oser, counter_cache: true
   belongs_to :parent, class_name: 'Comment', counter_cache: :children_count
   has_many :children, class_name: 'Comment', foreign_key: 'parent_id', dependent: :destroy
+  has_many :upvotes
+  has_many :upvote_osers, through: :upvotes, dependent: :destroy
+  has_many :downvotes
+  has_many :downvote_osers, through: :downvotes, dependent: :destroy
 
   validates :content, presence: true, length: { minimum: 1, too_short: 'Comment cannot be blank', maximum: 180, too_long: "Comment exceeds maximum length of %{count} characters" }
+
+  default_scope { # call `unscoped` if not desired
+    select <<~SQL
+      comments.*,
+      (
+        SELECT COUNT(upvotes.id) FROM upvotes
+        WHERE comment_id = comments.id
+      ) AS upvotes_count
+      ,
+      (
+        SELECT COUNT(downvotes.id) FROM downvotes
+        WHERE comment_id = comments.id
+      ) AS downvotes_count
+    SQL
+  }
 
   scope :children, -> { where('parent_id IS NOT NULL') }
   scope :search_import, -> { includes(:oser) } # Used for searchkick gem; eager loading on indexing
@@ -16,11 +35,12 @@ class Comment < ApplicationRecord
   end
 
   def hashed
+    # Must be called by a comment loaded with default scope
     {
       id: self.id,
       content: self.content,
-      ups: self.ups,
-      downs: self.downs,
+      upvotes: upvotes_count,
+      downvotes: downvotes_count,
       edited: self.edited,
       parent_id: self.parent_id,
       ancestor_ids: child? ? all_ancestor_ids : [],

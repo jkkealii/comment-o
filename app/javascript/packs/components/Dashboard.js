@@ -7,6 +7,7 @@ export default class Dashboard extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
+      currentOser: this.props.currentOser,
       osers: this.props.osers,
       comments: this.props.comments,
       newOserToggle: false,
@@ -36,13 +37,16 @@ export default class Dashboard extends React.Component {
     this._handleDeleteComment = this._handleDeleteComment.bind(this);
   }
 
-  _fetchAll() {
+  _fetchAll(currentOser = this.state.currentOser, childrenPopulated = null) {
     $.ajax({
       url: '/',
       type: 'GET',
       dataType: 'JSON',
+      data: {
+        children_populated: childrenPopulated
+      },
       success: (data) => {
-        this.setState({osers: data.osers, comments: data.comments});
+        this.setState({currentOser, osers: data.osers, comments: data.comments});
       }
     });
   }
@@ -296,7 +300,7 @@ export default class Dashboard extends React.Component {
   }
 
   render() {
-    let adminUserLoggedIn = this.props.loggedIn && this.props.currentOser.role === 'admin';
+    let adminUserLoggedIn = this.props.loggedIn && this.state.currentOser.role === 'admin';
     let osers = this.state.osers.map((oser) => {
       if (this.state.editingOsers.includes(oser.id)) {
         return(
@@ -385,7 +389,7 @@ export default class Dashboard extends React.Component {
                               <i className="fas fa-arrow-alt-circle-up"></i>
                             </span>
                           </span>
-                          <span className="tag is-success">{comment.ups}</span>
+                          <span className="tag is-success">{comment.upvotes}</span>
                         </div>
                       </div>
                       <div className="control">
@@ -395,7 +399,7 @@ export default class Dashboard extends React.Component {
                               <i className="fas fa-arrow-alt-circle-down"></i>
                             </span>
                           </span>
-                          <span className="tag is-warning">{comment.downs}</span>
+                          <span className="tag is-warning">{comment.downvotes}</span>
                         </div>
                       </div>
                     </div>
@@ -453,7 +457,7 @@ export default class Dashboard extends React.Component {
                               <i className="fas fa-arrow-alt-circle-up"></i>
                             </span>
                           </span>
-                          <span className="tag is-success">{comment.ups}</span>
+                          <span className="tag is-success">0</span>
                         </div>
                       </div>
                       <div className="control">
@@ -463,7 +467,7 @@ export default class Dashboard extends React.Component {
                               <i className="fas fa-arrow-alt-circle-down"></i>
                             </span>
                           </span>
-                          <span className="tag is-warning">{comment.downs}</span>
+                          <span className="tag is-warning">0</span>
                         </div>
                       </div>
                     </div>
@@ -501,9 +505,10 @@ export default class Dashboard extends React.Component {
         <Comments
           comments={this.state.comments}
           commentCount={this.state.comments.length}
-          currentOser={this.props.currentOser}
+          currentOser={this.state.currentOser}
           loggedIn={this.props.loggedIn}
           module={true}
+          onRefresh={this._fetchAll}
           showNewComment={false}
         />;
     }
@@ -548,7 +553,7 @@ export default class Dashboard extends React.Component {
             <span className="tag">{this.state.osers.length}</span>
           </div>
           <h1 className="title">
-            {this.props.loggedIn ? `Hello, ${this.props.currentOser.username}! Welcome back.` : 'Hello! Welcome to Comment\u2011O'}
+            {this.props.loggedIn ? `Hello, ${this.state.currentOser.username}! Welcome back.` : 'Hello! Welcome to Comment\u2011O'}
           </h1>
           <div className="tags has-addons">
             <span className="tag is-info">Comments</span>

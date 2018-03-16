@@ -2,10 +2,6 @@
 
 one:
   content: MyText
-  ups: 1
-  downs: 1
 
 two:
   content: MyText
-  ups: 1
-  downs: 1

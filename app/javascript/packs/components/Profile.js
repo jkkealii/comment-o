@@ -8,6 +8,7 @@ export default class Profile extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
+      currentOser: this.props.currentOser,
       oser: this.props.oser
     }
 
@@ -17,13 +18,16 @@ export default class Profile extends React.Component {
     this._handleSwatchHover = this._handleSwatchHover.bind(this);
   }
 
-  _fetchOser() {
+  _fetchOser(currentOser = this.state.currentOser, childrenPopulated = null) {
     $.ajax({
-      url: `/osers/${this.props.currentOser.id}`,
+      url: `/osers/${this.state.currentOser.id}`,
       type: 'GET',
       dataType: 'JSON',
+      data: {
+        children_populated: childrenPopulated
+      },
       success: (data) => {
-        this.setState({oser: data.oser});
+        this.setState({currentOser, oser: data.oser});
       },
       error: (xhr) => {
         let errors = $.parseJSON(xhr.responseText).errors;
@@ -46,7 +50,7 @@ export default class Profile extends React.Component {
     let oser = this.state.oser;
     oser.flair_color = color.hex;
     $.ajax({
-      url: `/osers/${this.props.currentOser.id}`,
+      url: `/osers/${this.state.currentOser.id}`,
       type: 'PATCH',
       dataType: 'JSON',
       data: {
@@ -66,7 +70,7 @@ export default class Profile extends React.Component {
   }
 
   render() {
-    let currentOserProfile = this.props.loggedIn && this.props.currentOser.id === this.state.oser.id;
+    let currentOserProfile = this.props.loggedIn && this.state.currentOser.id === this.state.oser.id;
     let subtitle = "doesn't have any comments yet-o!";
     let commentCount = this.state.oser.comments_count;
     if (commentCount === 1) {
@@ -78,11 +82,11 @@ export default class Profile extends React.Component {
       <Comments
         comments={this.state.oser.comments}
         commentCount={this.state.oser.comments_count}
-        currentOser={this.props.currentOser}
+        currentOser={this.state.currentOser}
         loggedIn={this.props.loggedIn}
         module={true}
+        onRefresh={this._fetchOser}
         showNewComment={false}
-        profileChange={true}
       />;
     let defaultColors = ['#23D160', '#FFDD57', '#00D1B2', '#FF3860', '#555555', '#dce775', '#ff8a65', '#ba68c8', '#209CEE'];
     if (this.state.oser.flair_color !== null && !defaultColors.includes(this.state.oser.flair_color)) {

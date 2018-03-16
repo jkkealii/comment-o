@@ -10,15 +10,13 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20180313070223) do
+ActiveRecord::Schema.define(version: 20180315215559) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
   create_table "comments", force: :cascade do |t|
     t.text "content", null: false
-    t.integer "ups", default: 0
-    t.integer "downs", default: 0
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.bigint "oser_id"
@@ -31,6 +29,15 @@ ActiveRecord::Schema.define(version: 20180313070223) do
     t.index ["oser_id"], name: "index_comments_on_oser_id"
   end
 
+  create_table "downvotes", force: :cascade do |t|
+    t.bigint "oser_id"
+    t.bigint "comment_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["comment_id"], name: "index_downvotes_on_comment_id"
+    t.index ["oser_id"], name: "index_downvotes_on_oser_id"
+  end
+
   create_table "osers", force: :cascade do |t|
     t.string "username", null: false
     t.string "flair"
@@ -40,6 +47,15 @@ ActiveRecord::Schema.define(version: 20180313070223) do
     t.string "role"
     t.string "flair_color"
     t.integer "comments_count", default: 0
+  end
+
+  create_table "upvotes", force: :cascade do |t|
+    t.bigint "oser_id"
+    t.bigint "comment_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["comment_id"], name: "index_upvotes_on_comment_id"
+    t.index ["oser_id"], name: "index_upvotes_on_oser_id"
   end
 
   add_foreign_key "comments", "osers"

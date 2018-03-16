@@ -3,6 +3,11 @@ Rails.application.routes.draw do
   get '/osers/all', to: 'home#osers'
   get '/comments/all', to: 'home#comments'
 
+  post '/upvotes', to: 'upvotes#create'
+  delete '/upvotes', to: 'upvotes#destroy'
+  post '/downvotes', to: 'downvotes#create'
+  delete '/downvotes', to: 'downvotes#destroy'
+
   get '/comments/:id/children', to: 'comments#children'
   get '/comments/search', to: 'comments#search'
 

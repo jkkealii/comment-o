@@ -6,6 +6,7 @@ export class Comments extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
+      currentOser: this.props.currentOser,
       comments: this.props.comments,
       commentCount: this.props.commentCount,
       newComment: '',
@@ -34,9 +35,7 @@ export class Comments extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    if (nextProps.profileChange !== undefined) {
-      this.setState(nextProps);
-    }
+    this.setState(nextProps);
   }
 
   _fetchComments(replyTargetId = null) {
@@ -44,37 +43,81 @@ export class Comments extends React.Component {
     if (replyTargetId !== null) {
       childrenPopulated.push(replyTargetId);
     }
-    $.ajax({
-      url: '/comments',
-      type: 'GET',
-      dataType: 'JSON',
-      data: {
-        top_level: true,
-        children_populated: childrenPopulated.join()
-      },
-      success: (data) => {
-        this.setState({
-          comments: data.comments,
-          commentCount: data.comment_count,
-          expandedComments: childrenPopulated
-        });
-      }
-    });
+    if (this.props.module) {
+      this.props.onRefresh(this.state.currentOser, childrenPopulated.join());
+    } else {
+      $.ajax({
+        url: '/comments',
+        type: 'GET',
+        dataType: 'JSON',
+        data: {
+          top_level: true,
+          children_populated: childrenPopulated.join()
+        },
+        success: (data) => {
+          this.setState({
+            comments: data.comments,
+            commentCount: data.comment_count,
+            expandedComments: childrenPopulated
+          });
+        }
+      });
+    }
   }
 
   _handleUpVote(event) {
-    const id = parseInt(event.currentTarget.dataset.commentId);
     if (this.props.loggedIn) {
-
+      const voted = event.currentTarget.dataset.voted === 'true';
+      const commentId = parseInt(event.currentTarget.dataset.commentId);
+      const oserId = this.state.currentOser.id;
+      $.ajax({
+        url: '/upvotes',
+        type: voted ? 'DELETE' : 'POST',
+        dataType: 'JSON',
+        data: {
+          upvote: {
+            oser_id: oserId,
+            comment_id: commentId
+          }
+        },
+        success: (data) => {
+          this.setState({currentOser: data.oser});
+          this._fetchComments();
+        },
+        error: (xhr) => {
+          let errors = $.parseJSON(xhr.responseText).errors;
+          alert(errors);
+        }
+      });
     } else {
       alert("Log in or sign up to join the Comment\u2011O craziness!");
     }
   }
 
   _handleDownVote(event) {
-    const id = parseInt(event.currentTarget.dataset.commentId);
     if (this.props.loggedIn) {
-
+      const voted = event.currentTarget.dataset.voted === 'true';
+      const commentId = parseInt(event.currentTarget.dataset.commentId);
+      const oserId = this.state.currentOser.id;
+      $.ajax({
+        url: '/downvotes',
+        type: voted ? 'DELETE' : 'POST',
+        dataType: 'JSON',
+        data: {
+          downvote: {
+            oser_id: oserId,
+            comment_id: commentId
+          }
+        },
+        success: (data) => {
+          this.setState({currentOser: data.oser});
+          this._fetchComments();
+        },
+        error: (xhr) => {
+          let errors = $.parseJSON(xhr.responseText).errors;
+          alert(errors);
+        }
+      });
     } else {
       alert("Log in or sign up to join the Comment\u2011O craziness!");
     }
@@ -91,7 +134,7 @@ export class Comments extends React.Component {
         data: {
           comment: {
             content: this.newComment.value,
-            oser_id: this.props.currentOser.id
+            oser_id: this.state.currentOser.id
           }
         },
         success: (data) => {
@@ -192,7 +235,7 @@ export class Comments extends React.Component {
         data: {
           comment: {
             content: this.state.currentReply,
-            oser_id: this.props.currentOser.id,
+            oser_id: this.state.currentOser.id,
             parent_id: id
           }
         },
@@ -321,7 +364,7 @@ export class Comments extends React.Component {
           onExpandComment={this._handleExpandComment}
           expandedComments={this.state.expandedComments}
           expanded={this.state.expandedComments.includes(comment.id)}
-          currentOser={this.props.currentOser}
+          currentOser={this.state.currentOser}
           loggedIn={this.props.loggedIn}
           key={comment.id}
         />
@@ -438,6 +481,8 @@ export class Comment extends React.Component {
         );
       }
     }
+    let commentUpvoted = this.props.loggedIn && this.props.currentOser.upvoted_comment_ids.includes(this.props.comment.id);
+    let commentDownvoted = this.props.loggedIn && this.props.currentOser.downvoted_comment_ids.includes(this.props.comment.id);
     return(
       <article className="media">
         <figure className="media-left">
@@ -446,15 +491,15 @@ export class Comment extends React.Component {
         <div className="media-content">
           <nav className="level" style={{marginBottom: 'unset'}}>
             <div className="level-left">
-              <div className="level-item" style={{alignItems: 'flex-start', justifyContent: 'flex-start'}}>
-                <div className="content" style={{width: '100%'}}>
+              <div className="level-item" style={{alignItems: 'flex-start', justifyContent: 'flex-start'}} onClick={() => window.open(`/osers/${this.props.comment.oser.id}`)}>
+                <a className="content" style={{width: '100%', color: 'unset'}}>
                   <strong>{this.props.comment.oser.username}</strong>
                   {this.props.comment.oser.flair !== null &&
                     <small className={this.props.comment.oser.flair_color !== null ? 'subtitle is-6' : 'subtitle is-6 has-text-info'} style={{color: this.props.comment.oser.flair_color, verticalAlign: 'super', fontSize: '0.75rem'}}>
                       &nbsp;- {this.props.comment.oser.flair}
                     </small>
                   }
-                </div>
+                </a>
               </div>
             </div>
             <div className="level-right" style={{alignItems: 'flex-end', justifyContent: 'flex-end', marginTop: 'unset'}}>
@@ -467,7 +512,7 @@ export class Comment extends React.Component {
                           <i className="fas fa-arrow-alt-circle-up"></i>
                         </span>
                       </span>
-                      <span className="tag is-success">{this.props.comment.ups}</span>
+                      <span className="tag is-success">{this.props.comment.upvotes}</span>
                     </div>
                   </div>
                   <div className="control">
@@ -477,7 +522,7 @@ export class Comment extends React.Component {
                           <i className="fas fa-arrow-alt-circle-down"></i>
                         </span>
                       </span>
-                      <span className="tag is-warning">{this.props.comment.downs}</span>
+                      <span className="tag is-warning">{this.props.comment.downvotes}</span>
                     </div>
                   </div>
                 </div>
@@ -529,10 +574,10 @@ export class Comment extends React.Component {
                 {this.props.loggedIn && this.props.currentOser.id === this.props.comment.oser.id && <a className="has-text-info" title="Edit" data-comment-id={this.props.comment.id} onClick={this.props.onEditComment} style={{marginRight: '0.5rem'}}>
                   <span className="icon is-small"><i className="fas fa-edit"></i></span>
                 </a>}
-                <a className="has-text-success" title="Up-vote" data-comment-id={this.props.comment.id} onClick={this.props.onUpVote} style={{marginRight: '0.5rem'}}>
+                <a className={commentUpvoted ? "has-text-success" : "has-text-light"} title="Upvote" data-voted={commentUpvoted} data-comment-id={this.props.comment.id} onClick={this.props.onUpVote} style={{marginRight: '0.5rem'}}>
                   <span className="icon is-small"><i className="fas fa-arrow-alt-circle-up"></i></span>
                 </a>
-                <a className="has-text-warning" title="Down-vote" data-comment-id={this.props.comment.id} onClick={this.props.onDownVote} style={{marginRight: '0.5rem'}}>
+                <a className={commentDownvoted ? "has-text-warning" : "has-text-light"} title="Downvote" data-voted={commentDownvoted} data-comment-id={this.props.comment.id} onClick={this.props.onDownVote} style={{marginRight: '0.5rem'}}>
                   <span className="icon is-small"><i className="fas fa-arrow-alt-circle-down"></i></span>
                 </a>
                 {this.props.comment.children_count > 0 && <a className="has-text-info" data-comment-id={this.props.comment.id} onClick={this.props.onExpandComment} style={{marginRight: '0.5rem'}}>

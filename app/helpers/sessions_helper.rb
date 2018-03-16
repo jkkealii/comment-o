@@ -8,7 +8,11 @@ module SessionsHelper
   end
 
   def current_oser_data
-    current_oser.as_json(only: [:id, :flair, :username, :role])
+    return nil unless logged_in?
+    data = current_oser.as_json(only: [:id, :flair, :username, :role])
+    data['upvoted_comment_ids'] = current_oser.upvotes.pluck(:comment_id)
+    data['downvoted_comment_ids'] = current_oser.downvotes.pluck(:comment_id)
+    data
   end
 
   def logged_in?

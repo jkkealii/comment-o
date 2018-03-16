@@ -2,8 +2,9 @@ class HomeController < ApplicationController
   layout 'application'
 
   def index
-    @comments = Comment.grab_comments(true, 5)
-    @comment_count = Comment.count
+    children_populated = params[:children_populated].present? ? params[:children_populated].split(',').map(&:to_i) : []
+    @comments = Comment.grab_comments(true, 5, children_populated)
+    @comment_count = Comment.all.size
     @osers = Oser.grab_osers(false)
 
     respond_to do |format|
@@ -24,6 +25,6 @@ class HomeController < ApplicationController
 
   def comments
     @comments = Comment.grab_comments
-    @comment_count = Comment.count
+    @comment_count = Comment.all.size
   end
 end
