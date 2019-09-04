@@ -1,6 +1,8 @@
 # COMMENT-O README
 
-[install Postgres](postgresql.org/download)
+`brew install postgresql`
+
+`brew install elasticsearch`
 
 `gem install pg`
 
@@ -9,6 +11,8 @@
 `yarn install`
 
 `rails db:setup`
+
+`brew services start elasticsearch`
 
 `gem install foreman`
 
